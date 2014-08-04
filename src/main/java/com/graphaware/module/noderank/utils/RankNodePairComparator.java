@@ -1,4 +1,4 @@
-package com.graphaware.module.noderank.testing;
+package com.graphaware.module.noderank.utils;
 
 import java.util.Comparator;
 

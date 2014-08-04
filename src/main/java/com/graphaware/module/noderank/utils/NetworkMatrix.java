@@ -1,4 +1,4 @@
-package com.graphaware.module.noderank.export;
+package com.graphaware.module.noderank.utils;
 
 
 import org.la4j.matrix.Matrix;
@@ -11,8 +11,6 @@ import java.util.ArrayList;
  *
  * The nodeList of nodes is an ordered array of nodes with
  * indices corresponding to rows/columns in the adjacency matrix (and derivates)
- *
- * TODO: Possibly rename NetworkMatrixFactory class and related classes such that its behavior is properly reflected
  */
 
 public class NetworkMatrix {
@@ -29,7 +27,7 @@ public class NetworkMatrix {
     /**
      * Returns an ordered array of nodes. Node indices correspond to
      * rows/columns of the adjacency matrix.
-     * @return
+     * @return ordered list of nodes
      */
     public ArrayList<Node> getNodeList() {
         return nodeList;
@@ -38,7 +36,7 @@ public class NetworkMatrix {
 
     /**
      * Returns the stored matrix
-     * @return
+     * @return matrix corresponding to the network
      */
     public Matrix getMatrix() {
         return matrix;

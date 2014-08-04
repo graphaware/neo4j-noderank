@@ -1,4 +1,4 @@
-package com.graphaware.module.noderank.export;
+package com.graphaware.module.noderank.utils;
 
 import org.la4j.factory.CRSFactory;
 import org.la4j.factory.Factory;
@@ -44,7 +44,7 @@ public class NetworkMatrixFactory {
      */
     public NetworkMatrix getAdjacencyMatrix() {
         Iterable<Node> nodes = at(database).getAllNodes();
-        ArrayList<Node> nodeList = new ArrayList<Node>();
+        ArrayList<Node> nodeList = new ArrayList<>();
         HashMap<Node, Integer> matrixIndices = new HashMap<>();
 
         int discoveredIndex = 0;
@@ -90,8 +90,7 @@ public class NetworkMatrixFactory {
              }
         }
 
-        NetworkMatrix toReturn = new NetworkMatrix(adjacency, nodeList);
-        return toReturn;
+        return new NetworkMatrix(adjacency, nodeList);
     }
 
     /**
@@ -144,8 +143,7 @@ public class NetworkMatrixFactory {
             }
         }
 
-        NetworkMatrix toReturn = new NetworkMatrix(adjacency, nodeList);
-        return toReturn;
+        return new NetworkMatrix(adjacency, nodeList);
     }
 
     /**
@@ -167,8 +165,7 @@ public class NetworkMatrixFactory {
         Matrix identityMatrix =  matrixFactory.createIdentityMatrix(size);
         Matrix googleMatrix = identityMatrix.multiply((1-damping)/((float) size)).add(transitionMatrix.multiply(damping));
 
-        NetworkMatrix toReturn = new NetworkMatrix(googleMatrix, nodeList);
-        return toReturn;
+        return new NetworkMatrix(googleMatrix, nodeList);
 
     }
 

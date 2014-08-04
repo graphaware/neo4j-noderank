@@ -1,11 +1,11 @@
 package com.graphaware.module.noderank;
 
-import com.graphaware.module.noderank.export.NetworkMatrix;
-import com.graphaware.module.noderank.export.NetworkMatrixFactory;
-import com.graphaware.module.noderank.testing.PageRank;
-import com.graphaware.module.noderank.testing.RankNodePair;
-import com.graphaware.module.noderank.testing.RankNodePairComparator;
-import com.graphaware.module.noderank.testing.SimilarityComparison;
+import com.graphaware.module.noderank.utils.NetworkMatrix;
+import com.graphaware.module.noderank.utils.NetworkMatrixFactory;
+import com.graphaware.module.noderank.globops.PageRank;
+import com.graphaware.module.noderank.utils.RankNodePair;
+import com.graphaware.module.noderank.utils.RankNodePairComparator;
+import com.graphaware.module.noderank.utils.SimilarityComparison;
 import com.graphaware.generator.GraphGenerator;
 import com.graphaware.generator.Neo4jGraphGenerator;
 import com.graphaware.generator.config.BarabasiAlbertConfig;
@@ -182,11 +182,11 @@ public class PageRankIntegration {
      */
     private void analyseResults(List<Node> pageRank, List<Node> neoRank) {
         SimilarityComparison similarityComparison = new SimilarityComparison();
-        LOG.info("Similarity of all entries: " + similarityComparison.compareListsOfEqualLength(pageRank, neoRank));
+        LOG.info("Similarity of all entries: " + similarityComparison.getHammingDistanceMeasure(pageRank, neoRank));
 
         List<Node> pageRank20 = pageRank.subList(0, (int) (pageRank.size() * .2));
         List<Node> neoRank20 = neoRank.subList(0, (int) (neoRank.size() * .2));
-        LOG.info("Similarity of top 20% entries: " + similarityComparison.compareListsOfEqualLength(pageRank20, neoRank20));
+        LOG.info("Similarity of top 20% entries: " + similarityComparison.getHammingDistanceMeasure(pageRank20, neoRank20));
 
         List<Node> pageRank5 = pageRank.subList(0, 5);
         List<Node> neoRank5 = neoRank.subList(0, 5);

@@ -1,6 +1,8 @@
-package com.graphaware.module.noderank.testing;
+package com.graphaware.module.noderank.globops;
 
-import com.graphaware.module.noderank.export.NetworkMatrix;
+import com.graphaware.module.noderank.utils.NetworkMatrix;
+import com.graphaware.module.noderank.utils.RankNodePair;
+import com.graphaware.module.noderank.utils.RankNodePairComparator;
 import org.la4j.LinearAlgebra;
 import org.la4j.factory.Basic1DFactory;
 import org.la4j.factory.CRSFactory;
@@ -30,8 +32,8 @@ public class PageRank {
      *          matrix must be irreducible for the algorithm to
      *          succeed)
      *
-     * @param transitionMatrix
-     * @return
+     * @param transitionMatrix transition mtx of the system
+     * @return pageRank vector
      */
     public Vector getPageRankVector(NetworkMatrix transitionMatrix, double damping) {
         try {
@@ -47,8 +49,8 @@ public class PageRank {
         int size;
 
         // Calculates the pageRank. The convergence to PageRank is guaranteed
-        // by picking the vector which converges to Perron Vector by Perron-
-        // -Frobenius theorem
+        // by picking the vector which converges to Perron Vector by
+        // Perron-Frobenius theorem
 
         size = transitionMatrix.getMatrix().rows();
 
@@ -64,7 +66,7 @@ public class PageRank {
     /**
      * Returns a pageRanked array list of
      * nodes contained in the network.
-     * @return
+     * @return returns a list of nodes
      */
     public List<Node> getPageRank(NetworkMatrix transitionMatrix, double damping) {
 
@@ -77,9 +79,9 @@ public class PageRank {
     /**
      * Returns (rank, node) pairs
      * sorted in descending order by pageRank
-     * @param transitionMatrix
-     * @param damping
-     * @return
+     * @param transitionMatrix tr. matrix
+     * @param damping damping factor
+     * @return rankNodePair list
      */
     public ArrayList<RankNodePair> getPageRankPairs(NetworkMatrix transitionMatrix, double damping) {
         Vector pageRankVector = getPageRankVector(transitionMatrix, damping);
@@ -99,8 +101,8 @@ public class PageRank {
      * WARNING: throws exceptions
      *
      * TODO: Is the way the exceptions are fired optimal?
-     * @param transitionMatrix
-     * @param damping
+     * @param transitionMatrix tr. matrix
+     * @param damping damping factor
      */
     private void validateArguments(NetworkMatrix transitionMatrix, double damping) throws Exception
     {

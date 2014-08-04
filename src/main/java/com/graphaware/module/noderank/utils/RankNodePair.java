@@ -1,4 +1,4 @@
-package com.graphaware.module.noderank.testing;
+package com.graphaware.module.noderank.utils;
 
 import com.graphaware.common.util.Pair;
 import org.neo4j.graphdb.Node;
@@ -14,8 +14,8 @@ public class RankNodePair extends Pair<Double, Node> {
     /**
      * Construct a new pair.
      *
-     * @param  rank
-     * @param node
+     * @param  rank rank of the node
+     * @param node node data
      */
     public RankNodePair(double rank, Node node) {
         super(rank, node);
@@ -23,7 +23,7 @@ public class RankNodePair extends Pair<Double, Node> {
 
     /**
      * Return rank stored in the INP
-     * @return
+     * @return returns rank of the node
      */
     public double rank() {
         return first();
@@ -38,8 +38,8 @@ public class RankNodePair extends Pair<Double, Node> {
 
     /**
      * Converts RankNodePairs to ArrayList of nodes
-     * @param rankNodePairs
-     * @return
+     * @param rankNodePairs list
+     * @return converted list of nodes
      */
     public static List<Node> convertToRankedNodeList(List<RankNodePair> rankNodePairs) {
         List<Node> toReturn = new ArrayList<>();

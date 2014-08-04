@@ -1,8 +1,8 @@
 package com.graphaware.module.noderank.export;
 
-import com.graphaware.module.noderank.export.NetworkMatrix;
-import com.graphaware.module.noderank.export.NetworkMatrixFactory;
-import com.graphaware.module.noderank.testing.PageRank;
+import com.graphaware.module.noderank.globops.PageRank;
+import com.graphaware.module.noderank.utils.NetworkMatrix;
+import com.graphaware.module.noderank.utils.NetworkMatrixFactory;
 import org.junit.Test;
 import org.neo4j.graphdb.*;
 import org.neo4j.helpers.Pair;

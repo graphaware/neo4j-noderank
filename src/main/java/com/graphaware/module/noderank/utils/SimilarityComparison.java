@@ -1,4 +1,4 @@
-package com.graphaware.module.noderank.testing;
+package com.graphaware.module.noderank.utils;
 
 import java.util.List;
 
@@ -12,13 +12,14 @@ public class SimilarityComparison {
      * Returns the most basic similarity
      * measure of the two lists of THE SAME LENGTH!
      *
-     * TODO: Perhaps weight by the order in case of ranks?
+     * This is just a normalized Hamming distance of
+     * the two strings.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a first list
+     * @param b second lisr
+     * @return normalized hamming distance
      */
-    public double compareListsOfEqualLength(List a, List b) {
+    public double getHammingDistanceMeasure(List a, List b) {
         if(a.size() != b.size())
             throw  new RuntimeException("Two lists of unequal length were tested for similarity!");
 
@@ -37,9 +38,9 @@ public class SimilarityComparison {
      * Returns an unordered similarity of
      * the two lists of THE SAME LENGTH!
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a first list
+     * @param b second list
+     * @return normalized number of equal elements
      */
     public double unorderedComparisonOfEqualLengthLists(List a, List b) {
         if(a.size() != b.size())
@@ -55,4 +56,10 @@ public class SimilarityComparison {
 
         return (double) numerator / (double) length;
     }
+
+    /**
+     * TODO: weight success by lexicographic permutation distance?
+     *
+     * Weight results by their lexicographic distance
+     */
 }
