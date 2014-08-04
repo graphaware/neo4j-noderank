@@ -19,19 +19,26 @@ public class Permutation<T> {
      * @param initial initial permutation as a list
      * @param comparator type comparator
      * @return nextPermutation in the sequence
+     *
+     * TODO: Check if the last permutation has been found
      */
     public List<T> nextPermutation(List<T> initial, Comparator<T> comparator) {
         List<T> shallowCopy = new ArrayList<>(initial);
 
+        if(isReverseOrdered(shallowCopy, comparator))
+            return shallowCopy;
+
         int i, j;
         for (i = shallowCopy.size()-1; i > 1; --i)
-             if(comparator.compare(shallowCopy.get(i), shallowCopy.get(i-1)) == 1)
-                 break;
+            if (comparator.compare(shallowCopy.get(i), shallowCopy.get(i - 1)) == 1) // stop at ordered seq. i-1 < i
+                break;
+
 
          // i index of the largest descending pair is found
-        for (j = shallowCopy.size()-1; j > i; --j)
-            if(comparator.compare(shallowCopy.get(j), shallowCopy.get(i-1)) == 1)
+        for (j = shallowCopy.size()-1; j > i; --j) {
+            if (comparator.compare(shallowCopy.get(j), shallowCopy.get(i - 1)) == 1) // i-1 < j
                 break;
+        }
 
         // swap index is found
         T temp = shallowCopy.get(j);
@@ -60,6 +67,37 @@ public class Permutation<T> {
             list.set(from + k, right);
             list.set(to - k, left);
         }
+    }
+
+    /***
+     * Checks if the list is reverse ordered.
+     * @param list list to check
+     * @param comparator comparator on the list
+     * @return true if reverse ordered
+     */
+    public boolean isReverseOrdered(List<T> list, Comparator<T> comparator) {
+        for (int i = 0; i < list.size() - 1; ++i)
+            if(comparator.compare(list.get(i), list.get(i+1)) == -1)
+                return false;
+
+
+        return true;
+    }
+
+
+    /**
+     * Checks if the list is ordered
+     * @param list list to check
+     * @param comparator comparator on the list
+     * @return true if ordered
+     */
+    public boolean isOrdered(List<T> list, Comparator<T> comparator) {
+        for (int i = 0; i < list.size() - 1; ++i)
+            if(comparator.compare(list.get(i), list.get(i+1)) == 1)
+                return false;
+
+
+        return true;
     }
 
 

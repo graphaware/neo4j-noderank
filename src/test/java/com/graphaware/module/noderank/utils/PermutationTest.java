@@ -14,10 +14,18 @@ public class PermutationTest {
     @Test
     public void testSubstringReverse() {
         Permutation<Integer> permutation = new Permutation<>();
-        List<Integer> toReverse = Arrays.asList(1, 2, 3, 4);
+        List<Integer> toReverse = Arrays.asList(1,2,3,4);
+        permutation.reverseSublist(toReverse, 1, 3); // Perform this on shallowCopy as well?
+        System.out.println(toReverse);
 
-//        permutation.reverseSublist(toReverse, 1, 5); // Perform this on shallowCopy as well?
-  //      System.out.println(toReverse);
+
+
+    }
+
+    @Test
+    public void testPermutationGeneration() {
+        Permutation<Integer> permutation = new Permutation<>();
+        List<Integer> toPermute = Arrays.asList(1,2,3,4);
 
         // clumsy
         Comparator<Integer> comp = new Comparator<Integer>() {
@@ -27,11 +35,12 @@ public class PermutationTest {
             }
         };
 
-        List<Integer> p1 = permutation.nextPermutation(toReverse, comp);
-        List<Integer> p2 = permutation.nextPermutation(p1, comp);
-        List<Integer> p3 = permutation.nextPermutation(p2, comp);
+        List<Integer> p1 = toPermute;
 
-        System.out.format("%s\t%s\t%s\n", p1.toString(), p2.toString(), p3.toString());
+        for(int i = 0; i < 24; ++i) {
+            p1 = permutation.nextPermutation(p1, comp);
+            System.out.format("%s\n", p1.toString());
+        }
 
     }
 
