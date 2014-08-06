@@ -4,12 +4,13 @@ import com.graphaware.common.util.Pair;
 import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * IndexNode pair, used for sorting the results of Page Rank algorithm
  */
-public class RankNodePair extends Pair<Double, Node> {
+public class RankNodePair extends Pair<Double, Node> implements Comparable<RankNodePair>{
 
     /**
      * Construct a new pair.
@@ -50,5 +51,21 @@ public class RankNodePair extends Pair<Double, Node> {
         }
 
         return toReturn;
+    }
+
+    /**
+     * Compares two ranks in descending order
+     * @param o
+     * @return
+     */
+    @Override
+    public int compareTo(RankNodePair o) {
+        if(rank() > o.rank()){
+            return -1;
+        }
+        if(rank() < o.rank()){
+            return 1;
+        }
+        return 0;
     }
 }
