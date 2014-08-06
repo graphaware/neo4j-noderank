@@ -1,22 +1,18 @@
 package com.graphaware.module.noderank;
 
-import com.graphaware.module.noderank.utils.NetworkMatrix;
-import com.graphaware.module.noderank.utils.NetworkMatrixFactory;
+import com.graphaware.module.algo.generator.GraphGenerator;
+import com.graphaware.module.algo.generator.Neo4jGraphGenerator;
+import com.graphaware.module.algo.generator.config.BarabasiAlbertConfig;
+import com.graphaware.module.algo.generator.config.BasicGeneratorConfig;
+import com.graphaware.module.algo.generator.node.SocialNetworkNodeCreator;
+import com.graphaware.module.algo.generator.relationship.BarabasiAlbertRelationshipGenerator;
+import com.graphaware.module.algo.generator.relationship.SocialNetworkRelationshipCreator;
 import com.graphaware.module.noderank.globops.PageRank;
-import com.graphaware.module.noderank.utils.RankNodePair;
-import com.graphaware.module.noderank.utils.RankNodePairComparator;
-import com.graphaware.module.noderank.utils.SimilarityComparison;
-import com.graphaware.generator.GraphGenerator;
-import com.graphaware.generator.Neo4jGraphGenerator;
-import com.graphaware.generator.config.BarabasiAlbertConfig;
-import com.graphaware.generator.config.BasicGeneratorConfiguration;
-import com.graphaware.generator.node.SocialNetworkNodeCreator;
-import com.graphaware.generator.relationship.BarabasiAlbertGraphRelationshipGenerator;
-import com.graphaware.generator.relationship.SocialNetworkRelationshipCreator;
+import com.graphaware.module.noderank.utils.*;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
 import com.graphaware.runtime.config.FluentRuntimeConfiguration;
-import com.graphaware.runtime.schedule.AdaptiveTimingStrategy;
+import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
 import org.junit.After;
 import org.junit.Before;
@@ -107,13 +103,13 @@ public class PageRankIntegration {
     @Test
     public void verifyRandomWalkerModuleCorrectlyGeneratesReasonablePageRankMeasurements() throws InterruptedException {
         // firstly, generate a graph
-        final int numberOfNodes = 50;
+        final int numberOfNodes = 100;
         GraphGenerator graphGenerator = new Neo4jGraphGenerator(database);
 
         LOG.info("Generating Barabasi-Albert social network graph with {} nodes...", numberOfNodes);
 
-        graphGenerator.generateGraph(new BasicGeneratorConfiguration(numberOfNodes, new BarabasiAlbertGraphRelationshipGenerator(
-                new BarabasiAlbertConfig(numberOfNodes, 2)), SocialNetworkNodeCreator.getInstance(), SocialNetworkRelationshipCreator
+        graphGenerator.generateGraph(new BasicGeneratorConfig(new BarabasiAlbertRelationshipGenerator(
+                new BarabasiAlbertConfig(numberOfNodes, 10)), SocialNetworkNodeCreator.getInstance(), SocialNetworkRelationshipCreator
                 .getInstance()));
 
         LOG.info("Computing adjacency matrix for graph...");
@@ -134,10 +130,17 @@ public class PageRankIntegration {
             LOG.info("Applying random graph walker module to page rank graph");
 
             // fourthly, run the rage rank module to compute the random walker's page rank
-            TimingStrategy timingStrategy = AdaptiveTimingStrategy
-                    .defaultConfiguration()
-                    .withDefaultDelayMillis(10)
-                    .withBusyThreshold(100);
+//            TimingStrategy timingStrategy = AdaptiveTimingStrategy
+//                    .defaultConfiguration()
+//                    .withDefaultDelayMillis(5)
+//                    .withBusyThreshold(100)
+//                    .withDelta(5)
+//                    .withMinimumDelayMillis(1)
+//                    .withMaximumDelayMillis(20);
+
+            TimingStrategy timingStrategy = FixedDelayTimingStrategy.getInstance()
+                    .withInitialDelay(50)
+                    .withDelay(2);
 
             GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(database, FluentRuntimeConfiguration
                     .defaultConfiguration().withTimingStrategy(timingStrategy));
