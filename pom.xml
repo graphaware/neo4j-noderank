@@ -140,6 +140,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- todo is this part of neo? if not use a different lib, we shouldn't ship GPL code -->
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-shell</artifactId>
+            <version>${neo4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.graphaware.neo4j</groupId>
             <artifactId>common</artifactId>
