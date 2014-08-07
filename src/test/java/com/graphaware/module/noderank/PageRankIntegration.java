@@ -103,7 +103,7 @@ public class PageRankIntegration {
     @Test
     public void verifyRandomWalkerModuleCorrectlyGeneratesReasonablePageRankMeasurements() throws InterruptedException {
         // firstly, generate a graph
-        final int numberOfNodes = 100;
+        final int numberOfNodes = 50;
         GraphGenerator graphGenerator = new Neo4jGraphGenerator(database);
 
         LOG.info("Generating Barabasi-Albert social network graph with {} nodes...", numberOfNodes);
@@ -156,7 +156,7 @@ public class PageRankIntegration {
             LOG.info("The highest PageRank in the network is: " + pageRankResult.get(0).node().getProperty("name").toString());
             //LOG.info("Top of the rank map is: {}", indexMap.get(0).getProperty("name"));
 
-            ArrayList<RankNodePair> neoRank = new ArrayList<>();
+            ArrayList<RankNodePair> nodeRank = new ArrayList<>();
             for (RankNodePair pair : pageRankResult) {
                 Node node = pair.node();
                 int rank = (int) pair.node().getProperty(RandomWalkerPageRankModule.PAGE_RANK_PROPERTY_KEY);
@@ -164,15 +164,15 @@ public class PageRankIntegration {
                 System.out.printf("%s\t%s\t%s\n", node.getProperty("name"),
                       "NeoRank: " + rank, "PageRank: " + pair.rank());
 
-                neoRank.add(new RankNodePair(rank, node));
+                nodeRank.add(new RankNodePair(rank, node));
             }
 
-            sort(neoRank, new RankNodePairComparator());
-            LOG.info("The highest NeoRank in the network is: " + neoRank.get(0).node().getProperty("name").toString());
+            sort(nodeRank, new RankNodePairComparator());
+            LOG.info("The highest NeoRank in the network is: " + nodeRank.get(0).node().getProperty("name").toString());
 
             // Perform an analysis of the results:
             LOG.info("Analysing results:");
-            analyseResults(RankNodePair.convertToRankedNodeList(pageRankResult), RankNodePair.convertToRankedNodeList(neoRank));
+            analyseResults(pageRankResult, nodeRank);
         }
     }
 
@@ -183,17 +183,25 @@ public class PageRankIntegration {
      * The input lists have to be
      * in descending order and have the same length
      */
-    private void analyseResults(List<Node> pageRank, List<Node> neoRank) {
+    private void analyseResults(List<RankNodePair> pageRankPairs, List<RankNodePair> nodeRankPairs) {
+        List<Node> pageRank = RankNodePair.convertToRankedNodeList(pageRankPairs);
+        List<Node> nodeRank = RankNodePair.convertToRankedNodeList(nodeRankPairs);
+
         SimilarityComparison similarityComparison = new SimilarityComparison();
-        LOG.info("Similarity of all entries: " + similarityComparison.getHammingDistanceMeasure(pageRank, neoRank));
+        LOG.info("Similarity of all entries: " + similarityComparison.getHammingDistanceMeasure(pageRank, nodeRank));
 
         List<Node> pageRank20 = pageRank.subList(0, (int) (pageRank.size() * .2));
-        List<Node> neoRank20 = neoRank.subList(0, (int) (neoRank.size() * .2));
-        LOG.info("Similarity of top 20% entries: " + similarityComparison.getHammingDistanceMeasure(pageRank20, neoRank20));
+        List<Node> nodeRank20 = nodeRank.subList(0, (int) (nodeRank.size() * .2));
+        LOG.info("Similarity of top 20% entries: " + similarityComparison.getHammingDistanceMeasure(pageRank20, nodeRank20));
 
         List<Node> pageRank5 = pageRank.subList(0, 5);
-        List<Node> neoRank5 = neoRank.subList(0, 5);
-        LOG.info("Unordered similarity of the top 5 entries: " + 100 * similarityComparison.unorderedComparisonOfEqualLengthLists(pageRank5, neoRank5) + "%");
+        List<Node> nodeRank5 = nodeRank.subList(0, 5);
+        LOG.info("Unordered similarity of the top 5 entries: " + 100 * similarityComparison.unorderedComparisonOfEqualLengthLists(pageRank5, nodeRank5) + "%");
+
+//        Permutation<Node> pageRankToNodeRankPermutation = new Permutation<>(pageRank20, nodeRank20);
+//        LOG.info("The normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getPermutationIndex());
+//        LOG.info("The normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getLogPermutationIndex());
+
 
     }
 
