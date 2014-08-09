@@ -4,6 +4,10 @@ import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.runtime.module.BaseRuntimeModule;
 import com.graphaware.runtime.module.TimerDrivenModule;
 
+import com.graphaware.runtime.walk.NodeSelector;
+import com.graphaware.runtime.walk.RandomNodeSelector;
+import com.graphaware.runtime.walk.RandomRelationshipSelector;
+import com.graphaware.runtime.walk.RelationshipSelector;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
@@ -23,8 +27,8 @@ public class RandomWalkerPageRankModule extends BaseRuntimeModule implements Tim
 	/** The name of the property that is maintained on visited nodes by this module. */
 	public static final String PAGE_RANK_PROPERTY_KEY = "pageRankValue";
 
-	private RandomNodeSelector randomNodeSelector;
-	private RelationshipChooser relationshipChooser;
+	private NodeSelector randomNodeSelector;
+	private RelationshipSelector relationshipChooser;
 
     /**
      * Constructs a new {@link RandomWalkerPageRankModule} with the given ID using the default module configuration.
@@ -43,8 +47,8 @@ public class RandomWalkerPageRankModule extends BaseRuntimeModule implements Tim
      */
 	public RandomWalkerPageRankModule(String moduleId, PageRankModuleConfiguration moduleConfig) {
 		super(moduleId);
-		this.randomNodeSelector = new HyperJumpRandomNodeSelector(moduleConfig.getNodeInclusionStrategy());
-		this.relationshipChooser = new RandomRelationshipChooser(moduleConfig.getRelationshipInclusionStrategy(),
+		this.randomNodeSelector = new RandomNodeSelector(moduleConfig.getNodeInclusionStrategy());
+		this.relationshipChooser = new RandomRelationshipSelector(moduleConfig.getRelationshipInclusionStrategy(),
 				moduleConfig.getNodeInclusionStrategy());
 	}
 
@@ -62,7 +66,7 @@ public class RandomWalkerPageRankModule extends BaseRuntimeModule implements Tim
     @Override
     public NodeBasedContext createInitialContext(GraphDatabaseService database) {
     	LOG.info("Starting page rank graph walker from random start node...");
-        return new NodeBasedContext(randomNodeSelector.selectRandomNode(database).getId());
+        return new NodeBasedContext(randomNodeSelector.selectNode(database).getId());
     }
 
     /**
@@ -75,7 +79,7 @@ public class RandomWalkerPageRankModule extends BaseRuntimeModule implements Tim
             currentNode = lastContext.find(database);
         } catch (NotFoundException e) {
         	LOG.warn("Node referenced in last context with ID: {} was not found in the database.  Selecting new node at random to continue.");
-            currentNode = this.randomNodeSelector.selectRandomNode(database);
+            currentNode = this.randomNodeSelector.selectNode(database);
         }
 
         Node nextNode = determineNextNode(currentNode, database);
@@ -87,11 +91,11 @@ public class RandomWalkerPageRankModule extends BaseRuntimeModule implements Tim
     }
 
 	private Node determineNextNode(Node currentNode, GraphDatabaseService database) {
-		Relationship chosenRelationship = this.relationshipChooser.chooseRelationship(currentNode);
+		Relationship chosenRelationship = this.relationshipChooser.selectRelationship(currentNode);
 		if (chosenRelationship != null) {
 			return chosenRelationship.getOtherNode(currentNode);
 		}
-		return this.randomNodeSelector.selectRandomNode(database);
+		return this.randomNodeSelector.selectNode(database);
 	}
 
 }

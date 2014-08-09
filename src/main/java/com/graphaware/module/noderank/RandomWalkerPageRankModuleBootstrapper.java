@@ -2,15 +2,15 @@ package com.graphaware.module.noderank;
 
 import java.util.Map;
 
+import com.graphaware.common.strategy.*;
+import com.graphaware.runtime.strategy.IncludeAllBusinessNodes;
+import com.graphaware.runtime.strategy.IncludeAllBusinessRelationships;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.graphaware.common.strategy.IncludeAllNodes;
-import com.graphaware.common.strategy.IncludeAllRelationships;
-import com.graphaware.common.strategy.InclusionStrategy;
 import com.graphaware.module.noderank.parser.ModuleConfigParameterParser;
 import com.graphaware.module.noderank.parser.RegexModuleConfigParameterParser;
 import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
@@ -31,12 +31,12 @@ public class RandomWalkerPageRankModuleBootstrapper implements RuntimeModuleBoot
 		LOG.trace("Configuration parameter map is: {}", configParams);
 
 		// parse Cypher-like expressions to configure inclusion strategies
-		InclusionStrategy<Node> nodeInclusionStrategy = configParams.containsKey("inclusionStrategy.node")
+		NodeInclusionStrategy nodeInclusionStrategy = configParams.containsKey("inclusionStrategy.node")
 				? this.configParameterParser.parseForNodeInclusionStrategy(configParams.get("inclusionStrategy.node"))
-				: IncludeAllNodes.getInstance();
-		InclusionStrategy<Relationship> relationshipInclusionStrategy = configParams.containsKey("inclusionStrategy.relationship")
+				: IncludeAllBusinessNodes.getInstance();
+		NodeCentricRelationshipInclusionStrategy relationshipInclusionStrategy = configParams.containsKey("inclusionStrategy.relationship")
 				? this.configParameterParser.parseForRelationshipInclusionStrategy(configParams.get("inclusionStrategy.relationship"))
-				: IncludeAllRelationships.getInstance();
+				: IncludeAllBusinessRelationships.getInstance();
 
 		return new RandomWalkerPageRankModule(moduleId,
 				new PageRankModuleConfiguration(nodeInclusionStrategy, relationshipInclusionStrategy));
