@@ -41,7 +41,7 @@ public class PageRankIntegration {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageRankIntegration.class);
 
-    private RandomWalkerPageRankModule pageRankModule;
+    private NodeRankModule pageRankModule;
     private GraphDatabaseService database;
     private ExecutionEngine executionEngine;
 
@@ -50,7 +50,7 @@ public class PageRankIntegration {
     public void setUp() {
         this.database = new TestGraphDatabaseFactory().newImpermanentDatabase();
         this.executionEngine = new ExecutionEngine(this.database);
-        this.pageRankModule = new RandomWalkerPageRankModule("TEST");
+        this.pageRankModule = new NodeRankModule("TEST");
     }
 
     @After
@@ -92,7 +92,7 @@ public class PageRankIntegration {
             for (Map<String, Object> map : result) {
                 Node n = (Node) map.get("node");
                 LOG.info(n.getProperty("name") + " has " + n.getDegree() + " relationships and a page rank value of: "
-                        + n.getProperty(RandomWalkerPageRankModule.PAGE_RANK_PROPERTY_KEY, 0));
+                        + n.getProperty(RandomWalkerPageRankModule.NODE_RANK_PROPERTY_KEY, 0));
             }
         }
     }*/
@@ -159,7 +159,7 @@ public class PageRankIntegration {
             ArrayList<RankNodePair> nodeRank = new ArrayList<>();
             for (RankNodePair pair : pageRankResult) {
                 Node node = pair.node();
-                int rank = (int) pair.node().getProperty(RandomWalkerPageRankModule.PAGE_RANK_PROPERTY_KEY);
+                int rank = (int) pair.node().getProperty(NodeRankModule.NODE_RANK_PROPERTY_KEY);
 
                 System.out.printf("%s\t%s\t%s\n", node.getProperty("name"),
                       "NeoRank: " + rank, "PageRank: " + pair.rank());

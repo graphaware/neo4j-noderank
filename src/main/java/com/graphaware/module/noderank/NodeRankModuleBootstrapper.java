@@ -6,8 +6,6 @@ import com.graphaware.common.strategy.*;
 import com.graphaware.runtime.strategy.IncludeAllBusinessNodes;
 import com.graphaware.runtime.strategy.IncludeAllBusinessRelationships;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +15,16 @@ import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
 
 /**
  * {@link RuntimeModuleBootstrapper} used by the {@link com.graphaware.runtime.GraphAwareRuntime} to prepare the
- * {@link RandomWalkerPageRankModule}.
+ * {@link NodeRankModule}.
  */
-public class RandomWalkerPageRankModuleBootstrapper implements RuntimeModuleBootstrapper {
+public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RandomWalkerPageRankModuleBootstrapper.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
 
 	private final ModuleConfigParameterParser configParameterParser = new RegexModuleConfigParameterParser();
 
 	@Override
-	public RandomWalkerPageRankModule bootstrapModule(String moduleId, Map<String, String> configParams, GraphDatabaseService database) {
+	public NodeRankModule bootstrapModule(String moduleId, Map<String, String> configParams, GraphDatabaseService database) {
 		LOG.info("Constructing new module with ID: {}", moduleId);
 		LOG.trace("Configuration parameter map is: {}", configParams);
 
@@ -38,8 +36,8 @@ public class RandomWalkerPageRankModuleBootstrapper implements RuntimeModuleBoot
 				? this.configParameterParser.parseForRelationshipInclusionStrategy(configParams.get("inclusionStrategy.relationship"))
 				: IncludeAllBusinessRelationships.getInstance();
 
-		return new RandomWalkerPageRankModule(moduleId,
-				new PageRankModuleConfiguration(nodeInclusionStrategy, relationshipInclusionStrategy));
+		return new NodeRankModule(moduleId,
+				new NodeRankModuleConfiguration(nodeInclusionStrategy, relationshipInclusionStrategy));
 	}
 
 }

@@ -48,8 +48,12 @@ public class RegexModuleConfigParameterParser implements ModuleConfigParameterPa
 					+ "As a result, the inclusion strategy will not be based on node properties.", e);
 		}
 
-        IncludeBusinessNodes strategy = IncludeBusinessNodes.all()
-                .with(m.group(1));
+        IncludeBusinessNodes strategy = IncludeBusinessNodes.all();
+
+        String label = m.group(1);
+        if (label != null && !"".equals(label)) {
+            strategy =strategy.with(label);
+        }
 
         for (String key : propertiesToMatch.keySet()) {
             strategy = strategy.with(key, equalTo(propertiesToMatch.get(key)));
