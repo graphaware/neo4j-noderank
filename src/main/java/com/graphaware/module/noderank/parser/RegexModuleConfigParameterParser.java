@@ -1,21 +1,20 @@
 package com.graphaware.module.noderank.parser;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
+import com.graphaware.common.strategy.NodeCentricRelationshipInclusionStrategy;
+import com.graphaware.common.strategy.NodeInclusionStrategy;
+import com.graphaware.runtime.strategy.IncludeBusinessNodes;
+import com.graphaware.runtime.strategy.IncludeBusinessRelationships;
 import org.neo4j.shell.ShellException;
 import org.neo4j.shell.util.json.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.graphaware.common.strategy.InclusionStrategy;
-import com.graphaware.common.strategy.RelationshipInclusionStrategy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.graphaware.common.description.predicate.Predicates.equalTo;
 
 /**
  * Implementation of {@link ModuleConfigParameterParser} that uses simple regular expressions to parse the configuration
@@ -29,7 +28,7 @@ public class RegexModuleConfigParameterParser implements ModuleConfigParameterPa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public InclusionStrategy<Node> parseForNodeInclusionStrategy(String nodeExpression) {
+	public NodeInclusionStrategy parseForNodeInclusionStrategy(String nodeExpression) {
 		if (nodeExpression == null) {
 			LOG.info("Null node expression specified so no inclusion strategy will be returned");
 			return null;
@@ -49,24 +48,27 @@ public class RegexModuleConfigParameterParser implements ModuleConfigParameterPa
 					+ "As a result, the inclusion strategy will not be based on node properties.", e);
 		}
 
-		return new LabelAndPropertyDrivenNodeInclusionStrategy(m.group(1), propertiesToMatch);
-	}
+        IncludeBusinessNodes strategy = IncludeBusinessNodes.all();
+
+        String label = m.group(1);
+        if (label != null && !"".equals(label)) {
+            strategy =strategy.with(label);
+        }
+
+        for (String key : propertiesToMatch.keySet()) {
+            strategy = strategy.with(key, equalTo(propertiesToMatch.get(key)));
+        }
+
+        return strategy;
+    }
 
 	@Override
-	public InclusionStrategy<Relationship> parseForRelationshipInclusionStrategy(String relExpression) {
+	public NodeCentricRelationshipInclusionStrategy parseForRelationshipInclusionStrategy(String relExpression) {
 		if (relExpression == null) {
 			LOG.info("Null relationship expression specified so no inclusion strategy will be returned");
 			return null;
 		}
 
-		final List<String> relationshipsToMatch = Arrays.asList(relExpression.split("\\|"));
-
-		return new RelationshipInclusionStrategy() {
-			@Override
-			public boolean include(Relationship object) {
-				return relationshipsToMatch.contains(object.getType().name());
-			}
-		};
+        return IncludeBusinessRelationships.all().with(relExpression.split("\\|"));
 	}
-
 }

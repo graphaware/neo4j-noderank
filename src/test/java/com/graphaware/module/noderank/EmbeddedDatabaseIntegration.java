@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.graphaware.module.noderank.RandomWalkerPageRankModule;
+import com.graphaware.runtime.ProductionRuntime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,9 +54,12 @@ public class EmbeddedDatabaseIntegration/*Test*/ {
 				.loadPropertiesFromFile("src/test/resources/test-neo4j.properties")
 				.newGraphDatabase();
 
+        ProductionRuntime.getRuntime(database).waitUntilStarted();
+        Thread.sleep(2000);
+
 		try (Transaction transaction = database.beginTx()) {
 			ExecutionResult executionResult = new ExecutionEngine(database).execute(
-					String.format("MATCH (p:Person) WHERE p.%s > 0 RETURN p", RandomWalkerPageRankModule.PAGE_RANK_PROPERTY_KEY));
+					String.format("MATCH (p:Person) WHERE p.%s > 0 RETURN p", NodeRankModule.NODE_RANK_PROPERTY_KEY));
 
 			assertTrue("The page rank module didn't run on startup", executionResult.iterator().hasNext());
 			transaction.success();

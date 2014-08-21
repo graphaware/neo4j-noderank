@@ -1,5 +1,7 @@
 package com.graphaware.module.noderank.parser;
 
+import com.graphaware.common.strategy.NodeCentricRelationshipInclusionStrategy;
+import com.graphaware.common.strategy.NodeInclusionStrategy;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
@@ -21,7 +23,7 @@ public interface ModuleConfigParameterParser {
 	 * @param nodeExpression The Cypher "MATCH" style expression that identifies nodes to include
 	 * @return An {@link InclusionStrategy} based on the given expression or <code>null</code> if invoked with <code>null</code>
 	 */
-	InclusionStrategy<Node> parseForNodeInclusionStrategy(String nodeExpression);
+	NodeInclusionStrategy parseForNodeInclusionStrategy(String nodeExpression);
 
 	/**
 	 * Parses the given Cypher expression and returns an {@link InclusionStrategy} that will include {@link Relationship}s that
@@ -34,6 +36,6 @@ public interface ModuleConfigParameterParser {
 	 * @param nodeExpression The Cypher "MATCH" style expression that identifies nodes to include
 	 * @return An {@link InclusionStrategy} based on the given expression or <code>null</code> if invoked with <code>null</code>
 	 */
-	InclusionStrategy<Relationship> parseForRelationshipInclusionStrategy(String relationshipExpression);
+	NodeCentricRelationshipInclusionStrategy parseForRelationshipInclusionStrategy(String relationshipExpression);
 
 }
