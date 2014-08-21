@@ -1,10 +1,11 @@
 package com.graphaware.module.noderank.utils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
-import com.google.common.math.LongMath;
-
+import com.google.common.math.BigIntegerMath;
+import java.math.BigInteger;
 import java.util.List;
-
 /**
  * Generator of permutations in lexicographic ordering
  */
@@ -17,6 +18,14 @@ public class Permutation<T extends Comparable<T>> {
         this.from = init;
     }
 
+    /**
+     * Returns a new permutation from -> to
+     * For example          [1,2,3,4] -> [1,2,4,3]
+     * is a permutation with Lehmer distance 1
+     *
+     * @param from initial (ordered) item list
+     * @param to final (permuted) item list
+     */
     public Permutation(List<T> from, List<T> to) {
         this.to = to;
         this.from = from;
@@ -69,8 +78,7 @@ public class Permutation<T extends Comparable<T>> {
         List<T> shallowTo = new ArrayList<>(to);
         List<Integer> lehmerCode = new ArrayList<>();
 
-        for (int t = 0; t < shallowTo.size(); ++t) {
-            T decElem = shallowTo.get(t);
+        for (T decElem : shallowTo) {
             int factoradicDigit = shallowFrom.indexOf(decElem);
             shallowFrom.remove(factoradicDigit);
             lehmerCode.add(factoradicDigit);
@@ -79,45 +87,62 @@ public class Permutation<T extends Comparable<T>> {
     }
 
     /**
-     * Returns a Lehmer distance from this permutation to the other.
-     *
-     * @param p
-     * @return integer lehmer code
+     * Returns a natural log of a number
+     * This particularly elegant solution is by leonbloy @ StackExchange
+     * @param bigInteger bigInteger to be logarithmed
+     * @return logarithm of the bigInteger
      */
-    public long getLehmerDistance(Permutation p) {
-        if (p.size() != size())
-            throw new RuntimeException("permutations of unequal length compared");
-
-        return Math.abs(p.getPermutationIndex() - getPermutationIndex());
-    }
-
-    /**
-     * Returns a logarithm of the permutation index
-     *
-     * @return logarithm of the permutation index
-     */
-    public double getLogPermutationIndex() {
-        return Math.log(getPermutationIndex());
+    private double getBigIntegerLog(BigInteger bigInteger) {
+        BigInteger val = bigInteger;
+        int blex = val.bitLength() - 1022; // any value in 60..1023 works
+        if (blex > 0)
+            val = val.shiftRight(blex);
+        double res = Math.log(val.doubleValue());
+        return blex > 0 ? res + blex * Math.log(2.0) : res;
     }
 
     /**
      * Returns a lexicographic index corresponding to the permutation
-     * TODO: Long implementation of what's below to avoid overflows?
      *
-     * @return
+     * @return permutation index
      */
-    public long getPermutationIndex() {
-        long index = 0;
+    public BigInteger getPermutationIndex() {
+        BigInteger index = BigInteger.valueOf(0);
         List<Integer> lehmerCode = getLehmerCode();
         int size = lehmerCode.size();
 
         for (int j = size - 1; j >= 0; j--) {
-            index += (long) (lehmerCode.get(j)) * LongMath.factorial(size - j - 1);
+            index = index.add(BigInteger.valueOf(lehmerCode.get(j)).multiply(BigIntegerMath.factorial(size - j - 1)));
         }
 
         return index;
     }
 
+
+    /**
+     * Returns a percentage to which the permutation is reversely permuted
+     * - i.e. how much is the ordering of the permutation distant from the
+     * initial state.
+     *
+     * @return double in interal [0.0, 1.0], 1.0 corresponds to unpermuted list
+     */
+    public double getNormedPermutationIndex() {
+        BigDecimal factorial = new BigDecimal(com.google.common.math.BigIntegerMath.factorial(size()).add(BigInteger.valueOf(-1)));
+        BigDecimal numerator = new BigDecimal(getPermutationIndex());
+
+        return 1.0 - numerator.divide(factorial, 8, RoundingMode.FLOOR).doubleValue();
+    }
+
+    /**
+     * Returns a percentage from the correct solution in logarithmic distance
+     * @return double in interal [0.0, 1.0], 1.0 corresponds to unpermuted list
+     */
+    public double getLogNormedPermutationIndex() {
+        double factorial = getBigIntegerLog(com.google.common.math.BigIntegerMath.factorial(size()).add(BigInteger.ONE));
+        double numerator = getBigIntegerLog(getPermutationIndex().add(BigInteger.ONE));
+
+        return 1.0 - numerator/factorial;
+    }
 
     /**
      * Reverses a sublist of a list
@@ -196,7 +221,7 @@ public class Permutation<T extends Comparable<T>> {
      * They are equal if the have the same
      * Lehmer code
      *
-     * @param other
+     * @param other object to be equal to the permutation
      * @return true if the two elements are equal
      */
     @Override
@@ -204,15 +229,13 @@ public class Permutation<T extends Comparable<T>> {
         if (other == null) return false;
         if (other == this) return true;
         if (!(other instanceof Permutation)) return false;
-        Permutation<T> otherPermutation = (Permutation) other;
+        Permutation otherPermutation = (Permutation) other;
 
         if (otherPermutation.size() != size())
             return false;
 
-        if (otherPermutation.hashCode() == hashCode())
-            return true;
+        return otherPermutation.hashCode() == hashCode();
 
-        return false;
     }
 
     /**
@@ -221,10 +244,10 @@ public class Permutation<T extends Comparable<T>> {
      *
      * @return lehmer code based hash code
      * <p/>
-     * TODO: long the hashCode() ???
+     * TODO: Is this a valid approach?
      */
     @Override
     public int hashCode() {
-        return (int) getPermutationIndex();
+        return getPermutationIndex().hashCode();
     }
 }

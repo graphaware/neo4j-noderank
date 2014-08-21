@@ -117,7 +117,7 @@ public class PageRankIntegration {
         // secondly, compute the adjacency matrix for this graph
         NetworkMatrixFactory networkMatrixFactory = new NetworkMatrixFactory(database);
 
-        try (Transaction tx = database.beginTx()) {
+        try (Transaction ignored = database.beginTx()) {
             LOG.info("Computing page rank based on adjacency matrix...");
 
             // thirdly, compute the page rank of this graph based on the adjacency matrix
@@ -161,8 +161,8 @@ public class PageRankIntegration {
                 Node node = pair.node();
                 int rank = (int) pair.node().getProperty(RandomWalkerPageRankModule.PAGE_RANK_PROPERTY_KEY);
 
-                System.out.printf("%s\t%s\t%s\n", node.getProperty("name"),
-                      "NeoRank: " + rank, "PageRank: " + pair.rank());
+//                System.out.printf("%s\t%s\t%s\n", node.getProperty("name"),
+//                      "NeoRank: " + rank, "PageRank: " + pair.rank());
 
                 nodeRank.add(new RankNodePair(rank, node));
             }
@@ -198,10 +198,21 @@ public class PageRankIntegration {
         List<Node> nodeRank5 = nodeRank.subList(0, 5);
         LOG.info("Unordered similarity of the top 5 entries: " + 100 * similarityComparison.unorderedComparisonOfEqualLengthLists(pageRank5, nodeRank5) + "%");
 
-//        Permutation<Node> pageRankToNodeRankPermutation = new Permutation<>(pageRank20, nodeRank20);
-//        LOG.info("The normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getPermutationIndex());
-//        LOG.info("The normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getLogPermutationIndex());
 
+        /**
+         * Measures the "Lehmer ratio" of the resulting list. The ratio is a percentage to which the new list is
+         * completely permuted. The Lehmer code for nodeRank results, given pageRank results is calculated and
+         * converted to decimal representation. This is the order-number of a permutation of nodeRank result,
+         * given the pageRank result as a start. The Lehmer code is the normalised by maximum allowed LC (size!).
+         *
+         * 1.0 corresponds to a perfect match of the two algorithms.
+         *
+         * The log Lehmer ratio is a ratio of logarithms of the two numbers.
+         */
+        Permutation<RankNodePair> pageRankToNodeRankPermutation = new Permutation<>(pageRankPairs, nodeRankPairs);
+        LOG.info("The un-normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getPermutationIndex().toString());
+        LOG.info("Lehmer distance ratio: {} ",  pageRankToNodeRankPermutation.getNormedPermutationIndex());
+//        LOG.info("Lehmer log-distance ratio: {} ", pageRankToNodeRankPermutation.getLogNormedPermutationIndex());
 
     }
 

@@ -1,55 +1,57 @@
 package com.graphaware.module.noderank.utils;
 
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class PermutationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(PermutationTest.class);
-
     @Test
     public void testPermutationGeneration() {
+        /**
+         * Construct init object, log the permutation into the console
+         */
         Permutation<Integer> permutation = new Permutation<>(Arrays.asList(1, 2, 3, 4));
-        LOG.info(permutation.toString());
 
-        Permutation<Integer> permutation1 = permutation.nextPermutation();
-        LOG.info(permutation1.toString());
-
-        Permutation<Integer> permutation2 = permutation1.nextPermutation();
-        LOG.info(permutation2.toString());
-
-        Permutation<Integer> permutation3 = permutation2.nextPermutation();
-        LOG.info(permutation3.toString());
-
+        /**
+         * Check that the permutation index mapping is correct:
+         */
         for (int i = 0; i < 24; ++i) {
-            LOG.info("{}", permutation.getPermutationIndex());
+            assertEquals(permutation.getPermutationIndex().intValue(), i);
             permutation = permutation.nextPermutation();
-            LOG.info("{}", permutation.toString());
-
         }
 
-        Permutation<Integer> permutation4 = new Permutation<>(Arrays.asList(1, 2, 3, 4));
-        LOG.info("{}", permutation4.getLehmerCode());
-
-        Permutation<Integer> permutation5 = new Permutation<>(Arrays.asList(1, 2, 3, 4), Arrays.asList(4, 3, 2, 1));
-        LOG.info("{}", permutation5.getLehmerCode());
-
+        /**
+         * Check equality between unequal-type permutations corresponding to the same permutation
+         * mathematically.
+         */
         Permutation<Character> permutationS = new Permutation<>(Arrays.asList('A', 'B', 'C', 'D'));
-        LOG.info("{}", permutationS.getPermutationIndex());
-
         permutationS = permutationS.nextPermutation();
-        LOG.info("{}", permutationS.getPermutationIndex());
-
         Permutation<Integer> permutationT = new Permutation<>(Arrays.asList(1, 2, 3, 4), Arrays.asList(1, 2, 4, 3));
         assertEquals(permutationT, permutationS);
 
+        /**
+         * Check that different-sizes permutations are interpreted as unequal, although they have
+         * the same permutation index.
+         */
         Permutation<Integer> permutationTN = new Permutation<>(Arrays.asList(1, 2, 3, 4, 5), Arrays.asList(1, 2, 3, 5, 4));
         assertNotEquals(permutationT, permutationTN);
+
+
+        /**
+         * Check that the range of normed permutation index is covered
+          */
+        Permutation<Integer> completePermutation = new Permutation<>(Arrays.asList(1,2,3,4), Arrays.asList(4,3,2,1));
+        System.out.format("Permutation index for complete permutation: %f\n", completePermutation.getNormedPermutationIndex());
+        assertEquals(completePermutation.getNormedPermutationIndex(), 0, 10e-7);
+
+        Permutation<Character> zeroPermutation = new Permutation<>(Arrays.asList('a','b','c'), Arrays.asList('a','b', 'c'));
+        System.out.format("Permutation index for zero permutation: %f\n", zeroPermutation.getLogNormedPermutationIndex());
+        assertEquals(zeroPermutation.getNormedPermutationIndex(), 1.0, 10e-7);
+
     }
 
 
