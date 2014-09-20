@@ -12,8 +12,11 @@ import com.graphaware.module.noderank.utils.*;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
 import com.graphaware.runtime.config.FluentRuntimeConfiguration;
+import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
+import com.graphaware.test.integration.DatabaseIntegrationTest;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +27,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,147 +36,103 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.sort;
+import static junit.framework.Assert.*;
 
 /**
- * Integration tests for page rank module.  Note that it's not called "Test" in order to prevent Maven running it.
+ * Integration tests for page rank module.
  */
-@RunWith(JUnit4.class)
-public class PageRankIntegration {
+public class PageRankIntegration extends DatabaseIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageRankIntegration.class);
 
-    private NodeRankModule pageRankModule;
-    private GraphDatabaseService database;
-    private ExecutionEngine executionEngine;
+    private NodeRankModule nodeRankModule;
 
-    /** */
-    @Before
-    public void setUp() {
-        this.database = new TestGraphDatabaseFactory().newImpermanentDatabase();
-        this.executionEngine = new ExecutionEngine(this.database);
-        this.pageRankModule = new NodeRankModule("TEST");
+    public void setUp() throws Exception {
+        super.setUp();
+        this.nodeRankModule = new NodeRankModule("TEST");
     }
 
-    @After
-    public void tearDown() {
-        this.database.shutdown();
-    }
-
-    /** */
-
-   /*  @Test
-    public void generateSocialNetworkAndWorkOutSomePageRankStatistics() {
-        try (Transaction transaction = this.database.beginTx()) {
-            // LOG.info("Creating arbitrary social network database...");
-
-            long time; //= System.currentTimeMillis();
-            // GraphGenerator graphGenerator = new Neo4jGraphGenerator(this.database);
-            // graphGenerator.generateGraph(new BasicGeneratorConfiguration(
-                //    9,
-              //      new SimpleGraphRelationshipGenerator(new SimpleDegreeDistribution(Arrays.asList(1, 1, 1, 2, 3, 4, 4, 3, 3))),
-                  //  SocialNetworkNodeCreator.getInstance(),
-                   // SocialNetworkRelationshipCreator.getInstance()));
-
-            //time = System.currentTimeMillis() - time;
-
-            //LOG.info("Created database in " + time + "ms");
-
-            final int totalSteps = 500;
-            LOG.info("Performing " + totalSteps + " steps to convergence on page rank");
-
-            NodeBasedContext context = this.pageRankModule.createInitialContext(database);
-            time = System.currentTimeMillis();
-            for (int i = 0; i < totalSteps; i++) {
-                context = this.pageRankModule.doSomeWork(context, this.database);
-            }
-            time = System.currentTimeMillis() - time;
-            LOG.info("All steps completed in " + time + "ms");
-
-            ExecutionResult result = this.executionEngine.execute("MATCH (node) RETURN node ORDER BY node.pageRankValue DESC");
-            for (Map<String, Object> map : result) {
-                Node n = (Node) map.get("node");
-                LOG.info(n.getProperty("name") + " has " + n.getDegree() + " relationships and a page rank value of: "
-                        + n.getProperty(RandomWalkerPageRankModule.NODE_RANK_PROPERTY_KEY, 0));
-            }
-        }
-    }*/
-
-    /**
-     * @throws InterruptedException If the test is interrupted when waiting for the page rank module to do its work
-     */
     @Test
-    public void verifyRandomWalkerModuleCorrectlyGeneratesReasonablePageRankMeasurements() throws InterruptedException {
-        // firstly, generate a graph
+    public void verifyRandomWalkerModuleGeneratesReasonablePageRank() {
+        generateGraph();
+
+        List<RankNodePair> pageRank = computePageRank(new NetworkMatrixFactory(getDatabase()));
+
+        List<RankNodePair> nodeRank = computeNodeRank();
+
+        analyseResults(pageRank, nodeRank);
+    }
+
+    private void generateGraph() {
         final int numberOfNodes = 50;
-        GraphGenerator graphGenerator = new Neo4jGraphGenerator(database);
+        GraphGenerator graphGenerator = new Neo4jGraphGenerator(getDatabase());
 
         LOG.info("Generating Barabasi-Albert social network graph with {} nodes...", numberOfNodes);
 
         graphGenerator.generateGraph(new BasicGeneratorConfig(new BarabasiAlbertRelationshipGenerator(
-                new BarabasiAlbertConfig(numberOfNodes, 10)), SocialNetworkNodeCreator.getInstance(), SocialNetworkRelationshipCreator
-                .getInstance()));
+                new BarabasiAlbertConfig(numberOfNodes, 10)),
+                SocialNetworkNodeCreator.getInstance(),
+                SocialNetworkRelationshipCreator.getInstance()));
+    }
 
-        LOG.info("Computing adjacency matrix for graph...");
+    private List<RankNodePair> computePageRank(NetworkMatrixFactory networkMatrixFactory) {
+        LOG.info("Computing page rank based on adjacency matrix...");
 
-        // secondly, compute the adjacency matrix for this graph
-        NetworkMatrixFactory networkMatrixFactory = new NetworkMatrixFactory(database);
+        List<RankNodePair> pageRankResult;
+        PageRank pageRank = new PageRank();
 
-        try (Transaction ignored = database.beginTx()) {
-            LOG.info("Computing page rank based on adjacency matrix...");
-
-            // thirdly, compute the page rank of this graph based on the adjacency matrix
-            PageRank pageRank = new PageRank();
-
+        try (Transaction tx = getDatabase().beginTx()) {
             NetworkMatrix transitionMatrix = networkMatrixFactory.getTransitionMatrix();
-            List<RankNodePair> pageRankResult = pageRank.getPageRankPairs(transitionMatrix, 0.85); // Sergei's & Larry's suggestion is to use .85 to become rich;)
-
-            //LOG.info(pageRankResult.toString());
-            LOG.info("Applying random graph walker module to page rank graph");
-
-            // fourthly, run the rage rank module to compute the random walker's page rank
-//            TimingStrategy timingStrategy = AdaptiveTimingStrategy
-//                    .defaultConfiguration()
-//                    .withDefaultDelayMillis(5)
-//                    .withBusyThreshold(100)
-//                    .withDelta(5)
-//                    .withMinimumDelayMillis(1)
-//                    .withMaximumDelayMillis(20);
-
-            TimingStrategy timingStrategy = FixedDelayTimingStrategy.getInstance()
-                    .withInitialDelay(50)
-                    .withDelay(2);
-
-            GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(database, FluentRuntimeConfiguration
-                    .defaultConfiguration().withTimingStrategy(timingStrategy));
-            runtime.registerModule(pageRankModule);
-            runtime.start();
-
-            LOG.info("Waiting for module walker to do its work");
-            TimeUnit.SECONDS.sleep(30);
-
-            // finally, compare both page rank metrics and verify the module is producing what it should
-//			List<Node> indexMap = networkMatrixFactory.getIndexMap();
-
+            pageRankResult = pageRank.getPageRankPairs(transitionMatrix, 0.85); // Sergei's & Larry's suggestion is to use .85 to become rich;)
             LOG.info("The highest PageRank in the network is: " + pageRankResult.get(0).node().getProperty("name").toString());
-            //LOG.info("Top of the rank map is: {}", indexMap.get(0).getProperty("name"));
 
-            ArrayList<RankNodePair> nodeRank = new ArrayList<>();
-            for (RankNodePair pair : pageRankResult) {
-                Node node = pair.node();
-                int rank = (int) pair.node().getProperty(NodeRankModule.NODE_RANK_PROPERTY_KEY);
+            tx.success();
+        }
 
-//                System.out.printf("%s\t%s\t%s\n", node.getProperty("name"),
-//                      "NeoRank: " + rank, "PageRank: " + pair.rank());
+        return pageRankResult;
+    }
 
-                nodeRank.add(new RankNodePair(rank, node));
+    private ArrayList<RankNodePair> computeNodeRank() {
+        letCrawlerDoItsJob();
+
+        ArrayList<RankNodePair> nodeRank = new ArrayList<>();
+
+        try (Transaction tx = getDatabase().beginTx()) {
+            for (Node node : GlobalGraphOperations.at(getDatabase()).getAllNodes()) {
+                if (IncludeAllBusinessNodes.getInstance().include(node)) {
+                    nodeRank.add(new RankNodePair((int) node.getProperty("nodeRank", 0), node));
+                }
             }
 
             sort(nodeRank, new RankNodePairComparator());
             LOG.info("The highest NeoRank in the network is: " + nodeRank.get(0).node().getProperty("name").toString());
 
-            // Perform an analysis of the results:
-            LOG.info("Analysing results:");
-            analyseResults(pageRankResult, nodeRank);
+            tx.success();
+        }
+
+        return nodeRank;
+    }
+
+    private void letCrawlerDoItsJob() {
+        LOG.info("Applying random graph walker module to the graph");
+
+        TimingStrategy timingStrategy = FixedDelayTimingStrategy.getInstance()
+                .withInitialDelay(50)
+                .withDelay(2);
+
+        GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(getDatabase(),
+                FluentRuntimeConfiguration
+                        .defaultConfiguration()
+                        .withTimingStrategy(timingStrategy));
+        runtime.registerModule(nodeRankModule);
+        runtime.start();
+
+        LOG.info("Waiting for module walker to do its work");
+
+        try {
+            TimeUnit.SECONDS.sleep(30);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -184,6 +144,8 @@ public class PageRankIntegration {
      * in descending order and have the same length
      */
     private void analyseResults(List<RankNodePair> pageRankPairs, List<RankNodePair> nodeRankPairs) {
+        LOG.info("Analysing results:");
+
         List<Node> pageRank = RankNodePair.convertToRankedNodeList(pageRankPairs);
         List<Node> nodeRank = RankNodePair.convertToRankedNodeList(nodeRankPairs);
 
@@ -211,9 +173,9 @@ public class PageRankIntegration {
          */
         Permutation<RankNodePair> pageRankToNodeRankPermutation = new Permutation<>(pageRankPairs, nodeRankPairs);
         LOG.info("The un-normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getPermutationIndex().toString());
-        LOG.info("Lehmer distance ratio: {} ",  pageRankToNodeRankPermutation.getNormedPermutationIndex());
-//        LOG.info("Lehmer log-distance ratio: {} ", pageRankToNodeRankPermutation.getLogNormedPermutationIndex());
+        LOG.info("Lehmer distance ratio: {} ", pageRankToNodeRankPermutation.getNormedPermutationIndex());
+        LOG.info("Lehmer log-distance ratio: {} ", pageRankToNodeRankPermutation.getLogNormedPermutationIndex());
 
+        assertTrue(pageRankToNodeRankPermutation.getNormedPermutationIndex() * 100 > 90);
     }
-
 }

@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class PermutationTest {
+
     @Test
     public void testPermutationGeneration() {
         /**
@@ -53,6 +54,4 @@ public class PermutationTest {
         assertEquals(zeroPermutation.getNormedPermutationIndex(), 1.0, 10e-7);
 
     }
-
-
 }

@@ -1,5 +1,6 @@
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.policy.NodeInclusionPolicy;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.runtime.module.BaseRuntimeModule;
 import com.graphaware.runtime.module.TimerDrivenModule;
@@ -17,25 +18,19 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link TimerDrivenModule} that perpetually walks the graph by randomly following relationships and increments
- * a node property called <code>pageRank</code> as it goes.
+ * a configured node property called as it goes.
  * <p/>
  * Sooner or later, depending on the size and shape of the network, it will converge to values that would be computed
  * by PageRank algorithm (not normalised).
- *
- * todo normalise?
- * todo what about hyperjumps?
  */
 public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModule<NodeBasedContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeRankModule.class);
 
-    /**
-     * The name of the property that is maintained on visited nodes by this module.
-     */
-    public static final String NODE_RANK_PROPERTY_KEY = "nodeRank";
-
-    private NodeSelector nodeSelector;
-    private RelationshipSelector relationshipSelector;
+    private final String propertyKey;
+    private final NodeSelector nodeSelector;
+    private final RelationshipSelector relationshipSelector;
+    private final NodeInclusionPolicy nodeInclusionPolicy;
 
     /**
      * Constructs a new {@link NodeRankModule} with the given ID using the default module configuration.
@@ -54,8 +49,10 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      */
     public NodeRankModule(String moduleId, NodeRankModuleConfiguration config) {
         super(moduleId);
-        this.nodeSelector = new RandomNodeSelector(config.getNodeInclusionStrategy());
-        this.relationshipSelector = new RandomRelationshipSelector(config.getRelationshipInclusionStrategy(), config.getNodeInclusionStrategy());
+        this.propertyKey = config.getRankPropertyKey();
+        this.nodeSelector = new RandomNodeSelector(config.getNodeInclusionPolicy());
+        this.relationshipSelector = new RandomRelationshipSelector(config.getRelationshipInclusionPolicy());
+        this.nodeInclusionPolicy = config.getNodeInclusionPolicy();
     }
 
     /**
@@ -94,7 +91,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
             return null;
         }
 
-        nextNode.setProperty(NODE_RANK_PROPERTY_KEY, (int) nextNode.getProperty(NODE_RANK_PROPERTY_KEY, 0) + 1);
+        nextNode.setProperty(propertyKey, (int) nextNode.getProperty(propertyKey, 0) + 1);
 
         return new NodeBasedContext(nextNode);
     }
@@ -125,7 +122,14 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
             return null;
         }
 
-        return randomRelationship.getOtherNode(currentNode);
+        Node result = randomRelationship.getOtherNode(currentNode);
+
+        if (!nodeInclusionPolicy.include(result)) {
+            LOG.warn("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
+                    "is not included by the Node Inclusion Policy. This is likely a mis-configuration");
+        }
+
+        return result;
     }
 
 }

@@ -37,7 +37,7 @@ public class NetworkMatrixFactoryTest {
             }
         };
 
-        try (org.neo4j.graphdb.Transaction transaction = database.beginTx()) {
+        try (Transaction transaction = database.beginTx()) {
 
             Label personLabel = DynamicLabel.label("Person");
             DynamicRelationshipType relationshipType = DynamicRelationshipType.withName("BOSS_OF");

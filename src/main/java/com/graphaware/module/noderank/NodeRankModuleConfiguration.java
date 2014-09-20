@@ -1,46 +1,80 @@
 package com.graphaware.module.noderank;
 
-import com.graphaware.common.strategy.*;
-import com.graphaware.runtime.strategy.IncludeAllBusinessNodes;
-import com.graphaware.runtime.strategy.IncludeAllBusinessRelationships;
+import com.graphaware.common.policy.NodeInclusionPolicy;
+import com.graphaware.common.policy.RelationshipInclusionPolicy;
+import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
+import com.graphaware.runtime.policy.all.IncludeAllBusinessRelationships;
 
 /**
- * Contains configuration settings for the page rank module.
+ * Configuration settings for the {@link NodeRankModule} with fluent interface.
  */
 public class NodeRankModuleConfiguration {
 
-	private final NodeInclusionStrategy nodeInclusionStrategy;
-	private final NodeCentricRelationshipInclusionStrategy relationshipInclusionStrategy;
+    private final String rankPropertyKey;
+    private final NodeInclusionPolicy nodeInclusionPolicy;
+    private final RelationshipInclusionPolicy relationshipInclusionPolicy;
 
-	/**
-	 * Retrieves the default {@link NodeRankModuleConfiguration}, which includes all (non-internal) nodes and relationships.
-	 *
-	 * @return The default {@link NodeRankModuleConfiguration}
-	 */
-	public static NodeRankModuleConfiguration defaultConfiguration() {
-		return new NodeRankModuleConfiguration(IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance());
-	}
-
-	/**
-	 * Constructs a new {@link NodeRankModuleConfiguration} based on the given inclusion strategies.
-	 *
-	 * @param nodeInclusionStrategy The {@link InclusionStrategy} to use for selecting nodes to include in the page rank
-	 *        algorithm
-	 * @param relationshipInclusionStrategy The {@link InclusionStrategy} for selecting which relationships to follow when
-	 *        crawling the graph
-	 */
-	public NodeRankModuleConfiguration(NodeInclusionStrategy nodeInclusionStrategy,
-                                       NodeCentricRelationshipInclusionStrategy relationshipInclusionStrategy) {
-
-		this.nodeInclusionStrategy = nodeInclusionStrategy;
-		this.relationshipInclusionStrategy = relationshipInclusionStrategy;
-	}
-
-    public NodeInclusionStrategy getNodeInclusionStrategy() {
-        return nodeInclusionStrategy;
+    /**
+     * Retrieves the default {@link NodeRankModuleConfiguration}, which includes all (non-internal) nodes and relationships.
+     *
+     * @return The default {@link NodeRankModuleConfiguration}
+     */
+    public static NodeRankModuleConfiguration defaultConfiguration() {
+        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance());
     }
 
-    public NodeCentricRelationshipInclusionStrategy getRelationshipInclusionStrategy() {
-        return relationshipInclusionStrategy;
+    /**
+     * Construct a new configuration with the given rank property key.
+     *
+     * @param rankPropertyKey key of the property written to the ranked nodes.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration withRankPropertyKey(String rankPropertyKey) {
+        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy());
+    }
+
+    /**
+     * Construct a new configuration with the given node inclusion policy.
+     *
+     * @param nodeInclusionPolicy The {@link NodeInclusionPolicy} to use for selecting nodes to include in the rank algorithm.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration with(NodeInclusionPolicy nodeInclusionPolicy) {
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy());
+    }
+
+    /**
+     * Construct a new configuration with the given node inclusion policy.
+     *
+     * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration with(RelationshipInclusionPolicy relationshipInclusionPolicy) {
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy);
+    }
+
+    /**
+     * Constructs a new {@link NodeRankModuleConfiguration} based on the given inclusion strategies.
+     *
+     * @param rankPropertyKey             name of the property written to the ranked nodes.
+     * @param nodeInclusionPolicy         The {@link NodeInclusionPolicy} to use for selecting nodes to include in the rank algorithm.
+     * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
+     */
+    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy) {
+        this.rankPropertyKey = rankPropertyKey;
+        this.nodeInclusionPolicy = nodeInclusionPolicy;
+        this.relationshipInclusionPolicy = relationshipInclusionPolicy;
+    }
+
+    public String getRankPropertyKey() {
+        return rankPropertyKey;
+    }
+
+    public NodeInclusionPolicy getNodeInclusionPolicy() {
+        return nodeInclusionPolicy;
+    }
+
+    public RelationshipInclusionPolicy getRelationshipInclusionPolicy() {
+        return relationshipInclusionPolicy;
     }
 }

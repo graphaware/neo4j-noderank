@@ -1,43 +1,55 @@
 package com.graphaware.module.noderank;
 
-import java.util.Map;
-
-import com.graphaware.common.strategy.*;
-import com.graphaware.runtime.strategy.IncludeAllBusinessNodes;
-import com.graphaware.runtime.strategy.IncludeAllBusinessRelationships;
+import com.graphaware.common.policy.NodeInclusionPolicy;
+import com.graphaware.common.policy.RelationshipInclusionPolicy;
+import com.graphaware.runtime.config.function.StringToNodeInclusionPolicy;
+import com.graphaware.runtime.config.function.StringToRelationshipInclusionPolicy;
+import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.graphaware.module.noderank.parser.ModuleConfigParameterParser;
-import com.graphaware.module.noderank.parser.RegexModuleConfigParameterParser;
-import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
+import java.util.Map;
 
 /**
- * {@link RuntimeModuleBootstrapper} used by the {@link com.graphaware.runtime.GraphAwareRuntime} to prepare the
- * {@link NodeRankModule}.
+ * {@link RuntimeModuleBootstrapper} for {@link NodeRankModule}.
  */
 public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
 
-	private final ModuleConfigParameterParser configParameterParser = new RegexModuleConfigParameterParser();
+    private static final String PROPERTY_KEY = "propertyKey";
+    private static final String NODE = "node";
+    private static final String RELATIONSHIP = "relationship";
 
-	@Override
-	public NodeRankModule bootstrapModule(String moduleId, Map<String, String> configParams, GraphDatabaseService database) {
-		LOG.info("Constructing new module with ID: {}", moduleId);
-		LOG.trace("Configuration parameter map is: {}", configParams);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeRankModule bootstrapModule(String moduleId, Map<String, String> config, GraphDatabaseService database) {
+        LOG.info("Constructing new module with ID: {}", moduleId);
+        LOG.trace("Configuration parameter map is: {}", config);
 
-		// parse Cypher-like expressions to configure inclusion strategies
-		NodeInclusionStrategy nodeInclusionStrategy = configParams.containsKey("inclusionStrategy.node")
-				? this.configParameterParser.parseForNodeInclusionStrategy(configParams.get("inclusionStrategy.node"))
-				: IncludeAllBusinessNodes.getInstance();
-		NodeCentricRelationshipInclusionStrategy relationshipInclusionStrategy = configParams.containsKey("inclusionStrategy.relationship")
-				? this.configParameterParser.parseForRelationshipInclusionStrategy(configParams.get("inclusionStrategy.relationship"))
-				: IncludeAllBusinessRelationships.getInstance();
+        NodeRankModuleConfiguration configuration = NodeRankModuleConfiguration.defaultConfiguration();
 
-		return new NodeRankModule(moduleId,
-				new NodeRankModuleConfiguration(nodeInclusionStrategy, relationshipInclusionStrategy));
-	}
+        if (config.get(PROPERTY_KEY) != null) {
+            LOG.info("Property key set to {}", config.get(PROPERTY_KEY));
+            configuration = configuration.withRankPropertyKey(config.get(PROPERTY_KEY));
+        }
+
+        if (config.get(NODE) != null) {
+            NodeInclusionPolicy policy = StringToNodeInclusionPolicy.getInstance().apply(config.get(NODE));
+            LOG.info("Node Inclusion Strategy set to {}", policy);
+            configuration = configuration.with(policy);
+        }
+
+        if (config.get(RELATIONSHIP) != null) {
+            RelationshipInclusionPolicy policy = StringToRelationshipInclusionPolicy.getInstance().apply(config.get(RELATIONSHIP));
+            LOG.info("Relationship Inclusion Strategy set to {}", policy);
+            configuration = configuration.with(policy);
+        }
+
+        return new NodeRankModule(moduleId, configuration);
+    }
 
 }
