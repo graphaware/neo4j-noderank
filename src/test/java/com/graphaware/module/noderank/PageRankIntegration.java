@@ -7,7 +7,7 @@ import com.graphaware.module.algo.generator.config.BasicGeneratorConfig;
 import com.graphaware.module.algo.generator.node.SocialNetworkNodeCreator;
 import com.graphaware.module.algo.generator.relationship.BarabasiAlbertRelationshipGenerator;
 import com.graphaware.module.algo.generator.relationship.SocialNetworkRelationshipCreator;
-import com.graphaware.module.noderank.globops.PageRank;
+import com.graphaware.module.noderank.utils.PageRank;
 import com.graphaware.module.noderank.utils.*;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
@@ -16,17 +16,9 @@ import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
 import com.graphaware.test.integration.DatabaseIntegrationTest;
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +76,7 @@ public class PageRankIntegration extends DatabaseIntegrationTest {
         try (Transaction tx = getDatabase().beginTx()) {
             NetworkMatrix transitionMatrix = networkMatrixFactory.getTransitionMatrix();
             pageRankResult = pageRank.getPageRankPairs(transitionMatrix, 0.85); // Sergei's & Larry's suggestion is to use .85 to become rich;)
-            LOG.info("The highest PageRank in the network is: " + pageRankResult.get(0).node().getProperty("name").toString());
+            LOG.info("The highest PageRank in the network is: " + getDatabase().getNodeById(pageRankResult.get(0).node()).getProperty("name").toString());
 
             tx.success();
         }
@@ -100,12 +92,12 @@ public class PageRankIntegration extends DatabaseIntegrationTest {
         try (Transaction tx = getDatabase().beginTx()) {
             for (Node node : GlobalGraphOperations.at(getDatabase()).getAllNodes()) {
                 if (IncludeAllBusinessNodes.getInstance().include(node)) {
-                    nodeRank.add(new RankNodePair((int) node.getProperty("nodeRank", 0), node));
+                    nodeRank.add(new RankNodePair((int) node.getProperty("nodeRank", 0), node.getId()));
                 }
             }
 
-            sort(nodeRank, new RankNodePairComparator());
-            LOG.info("The highest NeoRank in the network is: " + nodeRank.get(0).node().getProperty("name").toString());
+            sort(nodeRank);
+            LOG.info("The highest NeoRank in the network is: " + getDatabase().getNodeById(nodeRank.get(0).node()).getProperty("name").toString());
 
             tx.success();
         }
@@ -146,18 +138,18 @@ public class PageRankIntegration extends DatabaseIntegrationTest {
     private void analyseResults(List<RankNodePair> pageRankPairs, List<RankNodePair> nodeRankPairs) {
         LOG.info("Analysing results:");
 
-        List<Node> pageRank = RankNodePair.convertToRankedNodeList(pageRankPairs);
-        List<Node> nodeRank = RankNodePair.convertToRankedNodeList(nodeRankPairs);
+        List<Long> pageRank = RankNodePair.convertToRankedNodeList(pageRankPairs);
+        List<Long> nodeRank = RankNodePair.convertToRankedNodeList(nodeRankPairs);
 
         SimilarityComparison similarityComparison = new SimilarityComparison();
         LOG.info("Similarity of all entries: " + similarityComparison.getHammingDistanceMeasure(pageRank, nodeRank));
 
-        List<Node> pageRank20 = pageRank.subList(0, (int) (pageRank.size() * .2));
-        List<Node> nodeRank20 = nodeRank.subList(0, (int) (nodeRank.size() * .2));
+        List<Long> pageRank20 = pageRank.subList(0, (int) (pageRank.size() * .2));
+        List<Long> nodeRank20 = nodeRank.subList(0, (int) (nodeRank.size() * .2));
         LOG.info("Similarity of top 20% entries: " + similarityComparison.getHammingDistanceMeasure(pageRank20, nodeRank20));
 
-        List<Node> pageRank5 = pageRank.subList(0, 5);
-        List<Node> nodeRank5 = nodeRank.subList(0, 5);
+        List<Long> pageRank5 = pageRank.subList(0, 5);
+        List<Long> nodeRank5 = nodeRank.subList(0, 5);
         LOG.info("Unordered similarity of the top 5 entries: " + 100 * similarityComparison.unorderedComparisonOfEqualLengthLists(pageRank5, nodeRank5) + "%");
 
 

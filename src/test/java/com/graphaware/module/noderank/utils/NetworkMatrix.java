@@ -3,40 +3,38 @@ package com.graphaware.module.noderank.utils;
 
 import org.la4j.matrix.Matrix;
 import org.neo4j.graphdb.Node;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A data-object returned by NetworkMatrixFactory matrix methods.
- * Contains nodeList of the nodes and an adjacency matrix.
- *
- * The nodeList of nodes is an ordered array of nodes with
- * indices corresponding to rows/columns in the adjacency matrix (and derivates)
+ * An object returned by {@link NetworkMatrixFactory} matrix methods. Contains list of the node IDs and an adjacency matrix.
+ * <p/>
+ * The list of nodes is an ordered array of node IDs with indices corresponding to rows/columns in the adjacency matrix (and derivates).
  */
-
 public class NetworkMatrix {
 
-    private final ArrayList<Node> nodeList;
+    private final List<Long> nodeList;
     private final Matrix matrix;
 
-    public NetworkMatrix(Matrix matrix, ArrayList<Node> nodeList)
-    {
+    public NetworkMatrix(Matrix matrix, List<Long> nodeList) {
         this.matrix = matrix;
         this.nodeList = nodeList;
     }
 
     /**
-     * Returns an ordered array of nodes. Node indices correspond to
-     * rows/columns of the adjacency matrix.
-     * @return ordered list of nodes
+     * Returns an ordered array of node IDs. Node indices correspond to rows/columns of the adjacency matrix.
+     *
+     * @return ordered list of node IDs.
      */
-    public ArrayList<Node> getNodeList() {
+    public List<Long> getNodeList() {
         return nodeList;
     }
 
-
     /**
-     * Returns the stored matrix
-     * @return matrix corresponding to the network
+     * Returns the stored matrix.
+     *
+     * @return matrix corresponding to the network.
      */
     public Matrix getMatrix() {
         return matrix;
