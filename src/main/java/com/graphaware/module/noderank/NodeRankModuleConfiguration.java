@@ -13,6 +13,7 @@ public class NodeRankModuleConfiguration {
     private final String rankPropertyKey;
     private final NodeInclusionPolicy nodeInclusionPolicy;
     private final RelationshipInclusionPolicy relationshipInclusionPolicy;
+    private final int maxTopRankNodes;
 
     /**
      * Retrieves the default {@link NodeRankModuleConfiguration}, which includes all (non-internal) nodes and relationships.
@@ -20,7 +21,7 @@ public class NodeRankModuleConfiguration {
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance());
+        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10);
     }
 
     /**
@@ -30,7 +31,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withRankPropertyKey(String rankPropertyKey) {
-        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy());
+        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes());
     }
 
     /**
@@ -40,7 +41,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(NodeInclusionPolicy nodeInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy());
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes());
     }
 
     /**
@@ -50,7 +51,17 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(RelationshipInclusionPolicy relationshipInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy);
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes());
+    }
+
+    /**
+     * Construct a new configuration with the given maximum number of top ranked nodes to remember.
+     *
+     * @param maxTopRankNodes to remember.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration withMaxTopRankNodes(int maxTopRankNodes) {
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes);
     }
 
     /**
@@ -59,11 +70,13 @@ public class NodeRankModuleConfiguration {
      * @param rankPropertyKey             name of the property written to the ranked nodes.
      * @param nodeInclusionPolicy         The {@link NodeInclusionPolicy} to use for selecting nodes to include in the rank algorithm.
      * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
+     * @param maxTopRankNodes             maximum number of top ranked nodes to remember.
      */
-    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy) {
+    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes) {
         this.rankPropertyKey = rankPropertyKey;
         this.nodeInclusionPolicy = nodeInclusionPolicy;
         this.relationshipInclusionPolicy = relationshipInclusionPolicy;
+        this.maxTopRankNodes = maxTopRankNodes;
     }
 
     public String getRankPropertyKey() {
@@ -76,5 +89,9 @@ public class NodeRankModuleConfiguration {
 
     public RelationshipInclusionPolicy getRelationshipInclusionPolicy() {
         return relationshipInclusionPolicy;
+    }
+
+    public int getMaxTopRankNodes() {
+        return maxTopRankNodes;
     }
 }

@@ -1,10 +1,8 @@
 package com.graphaware.module.noderank;
 
-import com.graphaware.common.policy.NodeInclusionPolicy;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.runtime.module.BaseRuntimeModule;
 import com.graphaware.runtime.module.TimerDrivenModule;
-
 import com.graphaware.runtime.walk.NodeSelector;
 import com.graphaware.runtime.walk.RandomNodeSelector;
 import com.graphaware.runtime.walk.RandomRelationshipSelector;
@@ -23,14 +21,13 @@ import org.slf4j.LoggerFactory;
  * Sooner or later, depending on the size and shape of the network, it will converge to values that would be computed
  * by PageRank algorithm (not normalised).
  */
-public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModule<NodeBasedContext> {
+public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModule<NodeRankContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeRankModule.class);
 
-    private final String propertyKey;
+    private final NodeRankModuleConfiguration config;
     private final NodeSelector nodeSelector;
     private final RelationshipSelector relationshipSelector;
-    private final NodeInclusionPolicy nodeInclusionPolicy;
 
     /**
      * Constructs a new {@link NodeRankModule} with the given ID using the default module configuration.
@@ -49,10 +46,9 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      */
     public NodeRankModule(String moduleId, NodeRankModuleConfiguration config) {
         super(moduleId);
-        this.propertyKey = config.getRankPropertyKey();
+        this.config = config;
         this.nodeSelector = new RandomNodeSelector(config.getNodeInclusionPolicy());
         this.relationshipSelector = new RandomRelationshipSelector(config.getRelationshipInclusionPolicy());
-        this.nodeInclusionPolicy = config.getNodeInclusionPolicy();
     }
 
     /**
@@ -67,7 +63,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      * {@inheritDoc}
      */
     @Override
-    public NodeBasedContext createInitialContext(GraphDatabaseService database) {
+    public NodeRankContext createInitialContext(GraphDatabaseService database) {
         Node node = nodeSelector.selectNode(database);
 
         if (node == null) {
@@ -76,24 +72,36 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         }
 
         LOG.info("Starting node rank graph walker from random start node...");
-        return new NodeBasedContext(node.getId());
+        return new NodeRankContext(node.getId());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeBasedContext doSomeWork(NodeBasedContext lastContext, GraphDatabaseService database) {
+    public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
         Node lastNode = determineLastNode(lastContext, database);
         Node nextNode = determineNextNode(lastNode, database);
 
         if (nextNode == null) {
+            LOG.warn("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
             return null;
         }
 
-        nextNode.setProperty(propertyKey, (int) nextNode.getProperty(propertyKey, 0) + 1);
+        int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
+        nextNode.setProperty(config.getRankPropertyKey(), rankValue);
 
-        return new NodeBasedContext(nextNode);
+        NodeRankContext context;
+        if (lastContext == null) {
+            context = new NodeRankContext(nextNode);
+        }
+        else {
+            context = new NodeRankContext(nextNode, lastContext.getTopRankedNodes());
+        }
+
+        context.addRankedNode(nextNode, rankValue, config.getMaxTopRankNodes());
+
+        return context;
     }
 
     private Node determineLastNode(NodeBasedContext lastContext, GraphDatabaseService database) {
@@ -108,7 +116,6 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
             LOG.warn("Node referenced in last context with ID: {} was not found in the database.  Will start from a random node.");
             return null;
         }
-
     }
 
     private Node determineNextNode(Node currentNode, GraphDatabaseService database) {
@@ -124,7 +131,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
 
         Node result = randomRelationship.getOtherNode(currentNode);
 
-        if (!nodeInclusionPolicy.include(result)) {
+        if (!config.getNodeInclusionPolicy().include(result)) {
             LOG.warn("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
                     "is not included by the Node Inclusion Policy. This is likely a mis-configuration");
         }

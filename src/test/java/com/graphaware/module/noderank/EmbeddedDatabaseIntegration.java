@@ -36,7 +36,7 @@ public class EmbeddedDatabaseIntegration  {
 
         populateDatabase(database);
 
-        Thread.sleep(500);
+        Thread.sleep(1000);
 
         ExecutionResult executionResult = new ExecutionEngine(database).execute("MATCH (p:Person) WHERE p.nodeRank > 0 RETURN p");
 
@@ -45,14 +45,15 @@ public class EmbeddedDatabaseIntegration  {
 
     private void populateDatabase(GraphDatabaseService database) {
         ExecutionEngine engine = new ExecutionEngine(database);
-        engine.execute("MERGE (:Person {name:'Jeff'})-[:BOSS_OF]-(:Person {name:'Chris'});");
-        engine.execute("MERGE (:Person {name:'Jeff'})-[:BOSS_OF]-(:Person {name:'Paul'});");
-        engine.execute("MERGE (:Person {name:'Jeff'})-[:BOSS_OF]-(:Person {name:'Matthew'});");
-        engine.execute("MERGE (:Person {name:'Gary'})-[:BOSS_OF]-(:Person {name:'Alan'});");
-        engine.execute("MERGE (:Person {name:'Gary'})-[:BOSS_OF]-(:Person {name:'Robbie'});");
-        engine.execute("MERGE (:Person {name:'Gary'})-[:BOSS_OF]-(:Person {name:'Mark'});");
-        engine.execute("MERGE (:Person {name:'Gary'})-[:BOSS_OF]-(:Person {name:'Sue'});");
-        engine.execute("MERGE (:Person {name:'John'})-[:BOSS_OF]-(:Person {name:'Matthew'});");
-        engine.execute("MERGE (:Person {name:'John'})-[:BOSS_OF]-(:Person {name:'Sue'});");
+        engine.execute( "CREATE " +
+                " (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'}),"+
+                " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'}),"+
+                " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'}),"+
+                " (m)-[:FRIEND_OF]->(vi:Person {name:'Vince'}),"+
+                " (m)-[:FRIEND_OF]->(:Person {name:'Luanne'}),"+
+                " (vi)-[:FRIEND_OF]->(a),"+
+                " (d)-[:FRIEND_OF]->(a),"+
+                " (d)-[:FRIEND_OF]->(vi),"+
+                " (v)-[:FRIEND_OF]->(a)");
     }
 }

@@ -14,10 +14,16 @@ public class NetworkMatrixFactoryTest extends DatabaseIntegrationTest {
     @Override
     public void populateDatabase(GraphDatabaseService database) {
         ExecutionEngine engine = new ExecutionEngine(database);
-        engine.execute("MERGE (:Person {name:'John'})-[:BOSS_OF]-(:Person {name:'Carmack'});");
-        engine.execute("MERGE (:Person {name:'John'})-[:BOSS_OF]-(:Person {name:'Paul'});");
-        engine.execute("MERGE (:Person {name:'Romero'})-[:BOSS_OF]-(:Person {name:'Carmack'});");
-        engine.execute("MERGE (:Person {name:'Adrian'})-[:BOSS_OF]-(:Person {name:'Carmack'});");
+        engine.execute( "CREATE " +
+                " (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'}),"+
+                " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'}),"+
+                " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'}),"+
+                " (m)-[:FRIEND_OF]->(vi:Person {name:'Vince'}),"+
+                " (m)-[:FRIEND_OF]->(:Person {name:'Luanne'}),"+
+                " (vi)-[:FRIEND_OF]->(a),"+
+                " (d)-[:FRIEND_OF]->(a),"+
+                " (d)-[:FRIEND_OF]->(vi),"+
+                " (v)-[:FRIEND_OF]->(a)");
     }
 
     @Test
@@ -37,7 +43,7 @@ public class NetworkMatrixFactoryTest extends DatabaseIntegrationTest {
             Object name = getDatabase().getNodeById(pageRank.getPageRank(transitionMatrix, 0.85).get(0)).getProperty("name");
             System.out.println("The highest PageRank in the network is: " + name);
 
-            assertEquals("John", name);
+            assertEquals("Michal", name);
 
             tx.success();
         }

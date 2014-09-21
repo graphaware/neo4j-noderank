@@ -43,7 +43,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
 
         try (Transaction tx = getDatabase().beginTx()) {
             Node startNode = (Node) insertionResults.get("p");
-            NodeBasedContext lastContext = new NodeBasedContext(startNode);
+            NodeRankContext lastContext = new NodeRankContext(startNode);
 
             Node expectedNextNode = (Node) insertionResults.get("q");
 
@@ -89,7 +89,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
         try (Transaction tx = getDatabase().beginTx()) {
             Node person = (Node) insertionResults.get("p");
 
-            NodeBasedContext newContext = module.doSomeWork(new NodeBasedContext(person), getDatabase());
+            NodeRankContext newContext = module.doSomeWork(new NodeRankContext(person), getDatabase());
             assertNotNull("The new context shouldn't be null", newContext);
             Node nextNode = newContext.find(getDatabase());
             assertNotNull("The next node in the new context shouldn't be null", nextNode);

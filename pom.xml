@@ -130,6 +130,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <neo4j.version>2.1.4</neo4j.version>
         <graphaware.version>2.1.4.18</graphaware.version>
+        <spring.version>4.0.0.RELEASE</spring.version>
     </properties>
 
     <dependencies>
@@ -137,6 +138,13 @@
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
             <version>${neo4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graphaware.neo4j</groupId>
+            <artifactId>api</artifactId>
+            <version>${graphaware.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -154,11 +162,26 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Spring Framework -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>com.graphaware.neo4j</groupId>
             <version>2.1.4.18.2</version>
             <artifactId>algorithms</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.graphaware.neo4j</groupId>
+            <artifactId>server-community</artifactId>
+            <version>${graphaware.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -173,6 +196,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
 
