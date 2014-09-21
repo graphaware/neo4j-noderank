@@ -28,6 +28,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
     private final NodeRankModuleConfiguration config;
     private final NodeSelector nodeSelector;
     private final RelationshipSelector relationshipSelector;
+    private final TopRankedNodes topRankedNodes = new TopRankedNodes();
 
     /**
      * Constructs a new {@link NodeRankModule} with the given ID using the default module configuration.
@@ -72,7 +73,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         }
 
         LOG.info("Starting node rank graph walker from random start node...");
-        return new NodeRankContext(node.getId());
+        return new NodeRankContext(node.getId(), new Long[0]);
     }
 
     /**
@@ -80,28 +81,21 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      */
     @Override
     public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
+        topRankedNodes.initializeTopRankedNodesIfNeeded(lastContext, database, config);
+
         Node lastNode = determineLastNode(lastContext, database);
         Node nextNode = determineNextNode(lastNode, database);
 
         if (nextNode == null) {
             LOG.warn("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
-            return null;
+            return lastContext;
         }
 
         int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
         nextNode.setProperty(config.getRankPropertyKey(), rankValue);
+        topRankedNodes.addRankedNode(nextNode, rankValue, config.getMaxTopRankNodes());
 
-        NodeRankContext context;
-        if (lastContext == null) {
-            context = new NodeRankContext(nextNode);
-        }
-        else {
-            context = new NodeRankContext(nextNode, lastContext.getTopRankedNodes());
-        }
-
-        context.addRankedNode(nextNode, rankValue, config.getMaxTopRankNodes());
-
-        return context;
+        return new NodeRankContext(nextNode, topRankedNodes.produceTopRankedNodes());
     }
 
     private Node determineLastNode(NodeBasedContext lastContext, GraphDatabaseService database) {
@@ -139,4 +133,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         return result;
     }
 
+    public TopRankedNodes getTopRankedNodes() {
+        return topRankedNodes;
+    }
 }

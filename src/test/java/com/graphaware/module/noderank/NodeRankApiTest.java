@@ -1,13 +1,11 @@
 package com.graphaware.module.noderank;
 
 import com.graphaware.test.integration.NeoServerIntegrationTest;
-import junit.framework.Assert;
-import org.apache.http.HttpStatus;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
 
 import static com.graphaware.test.util.TestUtils.executeCypher;
 import static com.graphaware.test.util.TestUtils.get;
-import static junit.framework.Assert.*;
 
 public class NodeRankApiTest extends NeoServerIntegrationTest {
 
@@ -33,12 +31,13 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
 
         Thread.sleep(10000);
 
-        String s = get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.SC_OK);
+        String s = get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
+        System.out.println(s);
 //        assertTrue(s.contains("Michal"));
     }
 
     @Test
     public void requestToUnknownModuleShouldProduce404() throws InterruptedException {
-        get(baseUrl() + "/graphaware/noderank/unknown/", HttpStatus.SC_NOT_FOUND);
+        get(baseUrl() + "/graphaware/noderank/unknown/",  HttpStatus.NOT_FOUND.value());
     }
 }

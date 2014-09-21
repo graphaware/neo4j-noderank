@@ -36,7 +36,7 @@ public class EmbeddedDatabaseIntegration  {
 
         populateDatabase(database);
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         ExecutionResult executionResult = new ExecutionEngine(database).execute("MATCH (p:Person) WHERE p.nodeRank > 0 RETURN p");
 
