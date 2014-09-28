@@ -14,6 +14,8 @@ import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 /**
  * A {@link TimerDrivenModule} that perpetually walks the graph by randomly following relationships and increments
  * a configured node property called as it goes.
@@ -29,6 +31,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
     private final NodeSelector nodeSelector;
     private final RelationshipSelector relationshipSelector;
     private final TopRankedNodes topNodes = new TopRankedNodes();
+    private final Random random = new Random();
 
     /**
      * Constructs a new {@link NodeRankModule} with the given ID using the default module configuration.
@@ -114,6 +117,12 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
 
     private Node determineNextNode(Node currentNode, GraphDatabaseService database) {
         if (currentNode == null) {
+            return nodeSelector.selectNode(database);
+        }
+
+        //hyperjump
+        if (random.nextDouble() > config.getDampingFactor()) {
+            LOG.debug("Performing hyperjump");
             return nodeSelector.selectNode(database);
         }
 

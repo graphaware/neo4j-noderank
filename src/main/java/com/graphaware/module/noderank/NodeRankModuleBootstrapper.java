@@ -19,6 +19,7 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
     private static final Logger LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
 
     private static final String MAX_TOP_RANK_NODES = "maxTopRankNodes";
+    private static final String DAMPING = "dampingFactor";
     private static final String PROPERTY_KEY = "propertyKey";
     private static final String NODE = "node";
     private static final String RELATIONSHIP = "relationship";
@@ -41,6 +42,11 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
         if (config.get(MAX_TOP_RANK_NODES) != null) {
             LOG.info("Max top rank nodes set to {}", config.get(MAX_TOP_RANK_NODES));
             configuration = configuration.withMaxTopRankNodes(Integer.valueOf(config.get(MAX_TOP_RANK_NODES)));
+        }
+
+        if (config.get(DAMPING) != null) {
+            LOG.info("Damping factor set to {}", config.get(DAMPING));
+            configuration = configuration.withDampingFactor(Double.valueOf(config.get(DAMPING)));
         }
 
         if (config.get(NODE) != null) {

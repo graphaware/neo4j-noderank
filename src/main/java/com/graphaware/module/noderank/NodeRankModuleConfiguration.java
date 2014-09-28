@@ -14,6 +14,7 @@ public class NodeRankModuleConfiguration {
     private final NodeInclusionPolicy nodeInclusionPolicy;
     private final RelationshipInclusionPolicy relationshipInclusionPolicy;
     private final int maxTopRankNodes;
+    private final double dampingFactor;
 
     /**
      * Retrieves the default {@link NodeRankModuleConfiguration}, which includes all (non-internal) nodes and relationships.
@@ -21,7 +22,7 @@ public class NodeRankModuleConfiguration {
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10);
+        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
     }
 
     /**
@@ -31,7 +32,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withRankPropertyKey(String rankPropertyKey) {
-        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes());
+        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -41,7 +42,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(NodeInclusionPolicy nodeInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes());
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -51,7 +52,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(RelationshipInclusionPolicy relationshipInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes());
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -61,7 +62,17 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withMaxTopRankNodes(int maxTopRankNodes) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes);
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes, getDampingFactor());
+    }
+
+    /**
+     * Construct a new configuration with the given damping factor.
+     *
+     * @param dampingFactor new dampling factor.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration withDampingFactor(double dampingFactor) {
+        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), dampingFactor);
     }
 
     /**
@@ -72,11 +83,12 @@ public class NodeRankModuleConfiguration {
      * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
      * @param maxTopRankNodes             maximum number of top ranked nodes to remember.
      */
-    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes) {
+    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor) {
         this.rankPropertyKey = rankPropertyKey;
         this.nodeInclusionPolicy = nodeInclusionPolicy;
         this.relationshipInclusionPolicy = relationshipInclusionPolicy;
         this.maxTopRankNodes = maxTopRankNodes;
+        this.dampingFactor = dampingFactor;
     }
 
     public String getRankPropertyKey() {
@@ -93,5 +105,9 @@ public class NodeRankModuleConfiguration {
 
     public int getMaxTopRankNodes() {
         return maxTopRankNodes;
+    }
+
+    public double getDampingFactor() {
+        return dampingFactor;
     }
 }
