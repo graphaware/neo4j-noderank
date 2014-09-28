@@ -3,6 +3,7 @@ package com.graphaware.module.noderank;
 import com.graphaware.api.JsonNode;
 import com.graphaware.runtime.ProductionRuntime;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,9 @@ public class NodeRankApi {
         NodeRankModule module = ProductionRuntime.getRuntime(database).getModule(moduleId, NodeRankModule.class);
 
         try (Transaction tx = database.beginTx()) {
-            for (RankedNode node : module.getTopRankedNodes().getTopRankedNodes()) {
+            for (Node node : module.getTopNodes().getTopNodes()) {
                 try {
-                    result.add(new JsonNode(database.getNodeById(node.getNodeId())));
+                    result.add(new JsonNode(node));
 
                     if (result.size() >= limit) {
                         break;

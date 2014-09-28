@@ -1,6 +1,7 @@
 package com.graphaware.module.noderank;
 
 import com.graphaware.test.integration.NeoServerIntegrationTest;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
@@ -32,8 +33,7 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
         Thread.sleep(10000);
 
         String s = get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
-        System.out.println(s);
-//        assertTrue(s.contains("Michal"));
+        assertTrue(s.contains("{\"id\":1,\"labels\":[\"Person\"],\"name\":\"Michal\",\"nodeRank\""));
     }
 
     @Test

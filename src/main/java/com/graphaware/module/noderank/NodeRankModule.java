@@ -28,7 +28,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
     private final NodeRankModuleConfiguration config;
     private final NodeSelector nodeSelector;
     private final RelationshipSelector relationshipSelector;
-    private final TopRankedNodes topRankedNodes = new TopRankedNodes();
+    private final TopRankedNodes topNodes = new TopRankedNodes();
 
     /**
      * Constructs a new {@link NodeRankModule} with the given ID using the default module configuration.
@@ -81,7 +81,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      */
     @Override
     public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
-        topRankedNodes.initializeTopRankedNodesIfNeeded(lastContext, database, config);
+        topNodes.initializeIfNeeded(lastContext, database, config);
 
         Node lastNode = determineLastNode(lastContext, database);
         Node nextNode = determineNextNode(lastNode, database);
@@ -93,9 +93,9 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
 
         int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
         nextNode.setProperty(config.getRankPropertyKey(), rankValue);
-        topRankedNodes.addRankedNode(nextNode, rankValue, config.getMaxTopRankNodes());
+        topNodes.addNode(nextNode, rankValue);
 
-        return new NodeRankContext(nextNode, topRankedNodes.produceTopRankedNodes());
+        return new NodeRankContext(nextNode, topNodes.getTopNodeIds());
     }
 
     private Node determineLastNode(NodeBasedContext lastContext, GraphDatabaseService database) {
@@ -133,7 +133,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         return result;
     }
 
-    public TopRankedNodes getTopRankedNodes() {
-        return topRankedNodes;
+    public TopRankedNodes getTopNodes() {
+        return topNodes;
     }
 }

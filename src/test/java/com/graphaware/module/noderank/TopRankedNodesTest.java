@@ -19,8 +19,8 @@ public class TopRankedNodesTest extends DatabaseIntegrationTest {
     @Test
     public void emptyTopNodesShouldProduceEmptyList() {
         TopRankedNodes topNodes = new TopRankedNodes();
-        topNodes.initializeTopRankedNodesIfNeeded(null, getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
-        assertTrue(topNodes.getTopRankedNodes().isEmpty());
+        topNodes.initializeIfNeeded(null, getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
+        assertTrue(topNodes.getTopNodes().isEmpty());
     }
 
     @Test
@@ -37,34 +37,34 @@ public class TopRankedNodesTest extends DatabaseIntegrationTest {
         when(node5.getId()).thenReturn(5L);
 
         TopRankedNodes topNodes = new TopRankedNodes();
-        topNodes.initializeTopRankedNodesIfNeeded(null, getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
+        topNodes.initializeIfNeeded(null, getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
 
-        topNodes.addRankedNode(node1, 10, 3);
-        topNodes.addRankedNode(node2, 1, 3);
-        topNodes.addRankedNode(node3, 2, 3);
-        topNodes.addRankedNode(node4, 4, 3);
+        topNodes.addNode(node1, 10);
+        topNodes.addNode(node2, 1);
+        topNodes.addNode(node3, 2);
+        topNodes.addNode(node4, 4);
 
-        List<RankedNode> result = topNodes.getTopRankedNodes();
+        List<Node> result = topNodes.getTopNodes();
         assertEquals(3, result.size());
 
-        assertEquals(1L, result.get(0).getNodeId());
-        assertEquals(4L, result.get(1).getNodeId());
-        assertEquals(3L, result.get(2).getNodeId());
-        assertArrayEquals(new Long[]{1L, 4L, 3L}, topNodes.produceTopRankedNodes());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(4L, result.get(1).getId());
+        assertEquals(3L, result.get(2).getId());
+        assertArrayEquals(new Long[]{1L, 4L, 3L}, topNodes.getTopNodeIds());
 
-        topNodes.addRankedNode(node5, 1, 3);
-        topNodes.addRankedNode(node2, 3, 3);
-        topNodes.addRankedNode(node3, 5, 3);
-        topNodes.addRankedNode(node2, 6, 3);
-        topNodes.addRankedNode(node2, 7, 3);
+        topNodes.addNode(node5, 1);
+        topNodes.addNode(node2, 3);
+        topNodes.addNode(node3, 5);
+        topNodes.addNode(node2, 6);
+        topNodes.addNode(node2, 7);
 
-        result = topNodes.getTopRankedNodes();
+        result = topNodes.getTopNodes();
         assertEquals(3, result.size());
 
-        assertEquals(1L, result.get(0).getNodeId());
-        assertEquals(2L, result.get(1).getNodeId());
-        assertEquals(3L, result.get(2).getNodeId());
-        assertArrayEquals(new Long[]{1L, 2L, 3L}, topNodes.produceTopRankedNodes());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+        assertEquals(3L, result.get(2).getId());
+        assertArrayEquals(new Long[]{1L, 2L, 3L}, topNodes.getTopNodeIds());
     }
 
     @Test
@@ -83,19 +83,22 @@ public class TopRankedNodesTest extends DatabaseIntegrationTest {
         TopRankedNodes topNodes = new TopRankedNodes();
         try (Transaction tx = getDatabase().beginTx()) {
             //10L doesn't exist and should be ignored:
-            topNodes.initializeTopRankedNodesIfNeeded(new NodeRankContext(0L, new Long[]{0L, 10L, 1L, 2L}), getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
+            topNodes.initializeIfNeeded(new NodeRankContext(0L, new Long[]{0L, 10L, 1L, 2L}), getDatabase(), NodeRankModuleConfiguration.defaultConfiguration().withMaxTopRankNodes(3));
             tx.success();
         }
 
-        List<RankedNode> result = topNodes.getTopRankedNodes();
+        List<Node> result = topNodes.getTopNodes();
         assertEquals(3, result.size());
 
-        assertEquals(0L, result.get(0).getNodeId());
-        assertEquals(10, result.get(0).getRank());
-        assertEquals(1L, result.get(1).getNodeId());
-        assertEquals(5, result.get(1).getRank());
-        assertEquals(2L, result.get(2).getNodeId());
-        assertEquals(3, result.get(2).getRank());
-        assertArrayEquals(new Long[]{0L, 1L, 2L}, topNodes.produceTopRankedNodes());
+        try (Transaction tx = getDatabase().beginTx()) {
+            assertEquals(0L, result.get(0).getId());
+            assertEquals(10, result.get(0).getProperty("nodeRank"));
+            assertEquals(1L, result.get(1).getId());
+            assertEquals(5, result.get(1).getProperty("nodeRank"));
+            assertEquals(2L, result.get(2).getId());
+            assertEquals(3, result.get(2).getProperty("nodeRank"));
+            assertArrayEquals(new Long[]{0L, 1L, 2L}, topNodes.getTopNodeIds());
+            tx.success();
+        }
     }
 }

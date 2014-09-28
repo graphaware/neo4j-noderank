@@ -9,29 +9,29 @@ import org.neo4j.graphdb.Node;
  */
 public class NodeRankContext extends NodeBasedContext {
 
-    private Long[] topRankedNodes;
+    private Long[] topNodes;
 
-    public NodeRankContext(long nodeId, Long[] topRankedNodes) {
+    public NodeRankContext(long nodeId, Long[] topNodes) {
         super(nodeId);
-        this.topRankedNodes = topRankedNodes;
+        this.topNodes = topNodes;
     }
 
-    public NodeRankContext(Node node, Long[] topRankedNodes) {
+    public NodeRankContext(Node node, Long[] topNodes) {
         super(node);
-        this.topRankedNodes = topRankedNodes;
+        this.topNodes = topNodes;
     }
 
-    public NodeRankContext(long nodeId, long earliestNextCall, Long[] topRankedNodes) {
+    public NodeRankContext(long nodeId, long earliestNextCall, Long[] topNodes) {
         super(nodeId, earliestNextCall);
-        this.topRankedNodes = topRankedNodes;
+        this.topNodes = topNodes;
     }
 
-    public NodeRankContext(Node node, long earliestNextCall, Long[] topRankedNodes) {
+    public NodeRankContext(Node node, long earliestNextCall, Long[] topNodes) {
         super(node, earliestNextCall);
-        this.topRankedNodes = topRankedNodes;
+        this.topNodes = topNodes;
     }
 
-    public Long[] getTopRankedNodes() {
-        return topRankedNodes;
+    public Long[] getTopNodes() {
+        return topNodes;
     }
 }

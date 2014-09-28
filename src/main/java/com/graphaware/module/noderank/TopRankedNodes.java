@@ -1,16 +1,14 @@
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.util.BoundedSortedList;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A container for top ranked nodes.
@@ -19,88 +17,49 @@ public class TopRankedNodes {
 
     private static final Logger LOG = LoggerFactory.getLogger(TopRankedNodes.class);
 
-    private List<RankedNode> topRankedNodes;
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private BoundedSortedList<Node, Integer> topNodes;
 
-    public List<RankedNode> getTopRankedNodes() {
-        if (topRankedNodes == null) {
+    public List<Node> getTopNodes() {
+        if (topNodes == null) {
+            return Collections.emptyList();
+        }
+
+        return topNodes.getItems();
+    }
+
+    public void addNode(Node node, int rank) {
+        if (topNodes == null) {
             throw new IllegalStateException("Please initialize top ranked nodes first");
         }
 
-        lock.readLock().lock();
-        try {
-            return new LinkedList<>(topRankedNodes);
-        } finally {
-            lock.readLock().unlock();
-        }
+        topNodes.add(node, rank);
     }
 
-    public void addRankedNode(Node node, int rank, int maxTopRankedNodes) {
-        if (topRankedNodes == null) {
-            throw new IllegalStateException("Please initialize top ranked nodes first");
-        }
-
-        lock.readLock().lock();
-        try {
-            if (topRankedNodes.size() >= maxTopRankedNodes && topRankedNodes.get(topRankedNodes.size() - 1).getRank() > rank) {
-                return;
-            }
-        } finally {
-            lock.readLock().unlock();
-        }
-
-        RankedNode rankedNode = new RankedNode(node.getId(), rank);
-
-        lock.writeLock().lock();
-        try {
-            if (topRankedNodes.contains(rankedNode)) {
-                topRankedNodes.remove(rankedNode);
-            }
-
-            topRankedNodes.add(rankedNode);
-
-            Collections.sort(topRankedNodes, Collections.reverseOrder());
-
-            while (topRankedNodes.size() > maxTopRankedNodes) {
-                topRankedNodes.remove(topRankedNodes.size() - 1);
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public void initializeTopRankedNodesIfNeeded(NodeRankContext context, GraphDatabaseService database, NodeRankModuleConfiguration config) {
-        if (topRankedNodes != null) {
+    public void initializeIfNeeded(NodeRankContext context, GraphDatabaseService database, NodeRankModuleConfiguration config) {
+        if (topNodes != null) {
             return;
         }
 
-        lock.writeLock().lock();
-        try {
-            topRankedNodes = new ArrayList<>(config.getMaxTopRankNodes());
+        topNodes = new BoundedSortedList<>(config.getMaxTopRankNodes(), Collections.<Integer>reverseOrder());
 
-            if (context == null) {
-                return;
+        if (context == null) {
+            return;
+        }
+
+        for (long nodeId : context.getTopNodes()) {
+            try {
+                topNodes.add(database.getNodeById(nodeId), (int) database.getNodeById(nodeId).getProperty(config.getRankPropertyKey(), 0));
+            } catch (Exception e) {
+                LOG.warn("Exception while adding ranked node " + nodeId + " to the collection of top ranked nodes. Will ignore...", e);
             }
-
-            for (long nodeId : context.getTopRankedNodes()) {
-                try {
-                    topRankedNodes.add(new RankedNode(nodeId, (int) database.getNodeById(nodeId).getProperty(config.getRankPropertyKey(), 0)));
-                } catch (Exception e) {
-                    LOG.warn("Exception while adding ranked node " + nodeId + " to the collection of top ranked nodes. Will ignore...", e);
-                }
-            }
-
-            Collections.sort(topRankedNodes, Collections.reverseOrder());
-        } finally {
-            lock.writeLock().unlock();
         }
     }
 
-    public Long[] produceTopRankedNodes() {
+    public Long[] getTopNodeIds() {
         List<Long> result = new LinkedList<>();
 
-        for (RankedNode rankedNode : getTopRankedNodes()) {
-            result.add(rankedNode.getNodeId());
+        for (Node node : getTopNodes()) {
+            result.add(node.getId());
         }
 
         return result.toArray(new Long[result.size()]);
