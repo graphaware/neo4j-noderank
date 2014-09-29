@@ -101,7 +101,7 @@ To use the NodeRank programmatically, register the module like this
 
 ```java
 GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(database);  //where database is an instance of GraphDatabaseService
-NodeRankModule module = new NodeRankModule("CFM");
+NodeRankModule module = new NodeRankModule("NR");
 runtime.registerModule(module);
 runtime.start();
 ```
