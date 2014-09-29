@@ -68,7 +68,7 @@ public class NodeRankModuleConfiguration {
     /**
      * Construct a new configuration with the given damping factor.
      *
-     * @param dampingFactor new dampling factor.
+     * @param dampingFactor new damping factor.
      * @return new config.
      */
     public NodeRankModuleConfiguration withDampingFactor(double dampingFactor) {
@@ -84,6 +84,14 @@ public class NodeRankModuleConfiguration {
      * @param maxTopRankNodes             maximum number of top ranked nodes to remember.
      */
     private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor) {
+        if (maxTopRankNodes < 0) {
+            throw new IllegalArgumentException("Max top ranked nodes must be > 0");
+        }
+
+        if (dampingFactor < 0 || dampingFactor > 1.0) {
+            throw new IllegalArgumentException("Damping factor must be between 0.0 and 1.0");
+        }
+
         this.rankPropertyKey = rankPropertyKey;
         this.nodeInclusionPolicy = nodeInclusionPolicy;
         this.relationshipInclusionPolicy = relationshipInclusionPolicy;
