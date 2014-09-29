@@ -136,22 +136,19 @@ The REST API returns a JSON array of nodes, e.g.
         "id": 5,
         "labels": ["Person", "Male"],
         "nodeRank": 3022,
-        "name": "Brandon Morley",
-        "uuid": "6d0447a2-476a-11e4-86c7-14109fecc604"
+        "name": "Brandon Morley"
     },
     {
         "id": 9,
         "labels": ["Person", "Male"],
         "nodeRank": 2656,
-        "name": "Liam Rees",
-        "uuid": "6d046eb2-476a-11e4-86c7-14109fecc604"
+        "name": "Liam Rees"
     },
     {
         "id": 8,
         "labels": ["Person", "Female"],
         "nodeRank": 2280,
-        "name": "Amelie Green",
-        "uuid": "6d046eb1-476a-11e4-86c7-14109fecc604"
+        "name": "Amelie Green"
     }
 ]
 ```
