@@ -1,28 +1,13 @@
 package com.graphaware.module.noderank;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import com.graphaware.runtime.ProductionRuntime;
-import com.graphaware.test.integration.DatabaseIntegrationTest;
-import org.junit.Before;
+import com.graphaware.runtime.RuntimeRegistry;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterable;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.Pair;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.neo4j.test.impl.EphemeralFileSystemAbstraction;
+
+import static org.junit.Assert.assertTrue;
 
 public class EmbeddedDatabaseIntegration  {
 
@@ -32,7 +17,7 @@ public class EmbeddedDatabaseIntegration  {
                 .loadPropertiesFromFile("src/test/resources/test-neo4j.properties")
                 .newGraphDatabase();
 
-        ProductionRuntime.getRuntime(database).waitUntilStarted();
+        RuntimeRegistry.getStartedRuntime(database);
 
         populateDatabase(database);
 

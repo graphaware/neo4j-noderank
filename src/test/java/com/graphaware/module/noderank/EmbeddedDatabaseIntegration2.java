@@ -2,7 +2,7 @@ package com.graphaware.module.noderank;
 
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
-import com.graphaware.runtime.ProductionRuntime;
+import com.graphaware.runtime.RuntimeRegistry;
 import org.junit.Test;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
@@ -33,7 +33,7 @@ public class EmbeddedDatabaseIntegration2 {
 
         assertTrue("The page rank module didn't run on startup", executionResult.iterator().hasNext());
 
-        NodeRankModule nodeRankModule = ProductionRuntime.getStartedRuntime(database).getModule("NR", NodeRankModule.class);
+        NodeRankModule nodeRankModule = RuntimeRegistry.getStartedRuntime(database).getModule("NR", NodeRankModule.class);
         List<Node> topNodes = nodeRankModule.getTopNodes().getTopNodes();
         assertTrue(topNodes.size() > 0);
     }

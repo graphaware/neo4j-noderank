@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.sort;
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for page rank module.

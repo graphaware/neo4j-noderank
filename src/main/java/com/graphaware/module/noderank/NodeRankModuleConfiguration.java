@@ -76,7 +76,7 @@ public class NodeRankModuleConfiguration {
     }
 
     /**
-     * Constructs a new {@link NodeRankModuleConfiguration} based on the given inclusion strategies.
+     * Constructs a new {@link NodeRankModuleConfiguration} based on the given configuration details.
      *
      * @param rankPropertyKey             name of the property written to the ranked nodes.
      * @param nodeInclusionPolicy         The {@link NodeInclusionPolicy} to use for selecting nodes to include in the rank algorithm.

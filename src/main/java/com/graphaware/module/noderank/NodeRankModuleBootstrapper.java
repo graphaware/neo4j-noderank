@@ -51,13 +51,13 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
 
         if (config.get(NODE) != null) {
             NodeInclusionPolicy policy = StringToNodeInclusionPolicy.getInstance().apply(config.get(NODE));
-            LOG.info("Node Inclusion Strategy set to {}", policy);
+            LOG.info("Node Inclusion Policy set to {}", policy);
             configuration = configuration.with(policy);
         }
 
         if (config.get(RELATIONSHIP) != null) {
             RelationshipInclusionPolicy policy = StringToRelationshipInclusionPolicy.getInstance().apply(config.get(RELATIONSHIP));
-            LOG.info("Relationship Inclusion Strategy set to {}", policy);
+            LOG.info("Relationship Inclusion Policy set to {}", policy);
             configuration = configuration.with(policy);
         }
 

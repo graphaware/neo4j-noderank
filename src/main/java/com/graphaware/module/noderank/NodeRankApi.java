@@ -1,7 +1,7 @@
 package com.graphaware.module.noderank;
 
 import com.graphaware.api.JsonNode;
-import com.graphaware.runtime.ProductionRuntime;
+import com.graphaware.runtime.RuntimeRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
@@ -30,10 +30,10 @@ public class NodeRankApi {
 
     @RequestMapping(value = "/{moduleId}", method = RequestMethod.GET)
     @ResponseBody
-    public List<JsonNode> getChangeFeed(@PathVariable String moduleId, @RequestParam(value = "limit", defaultValue = "10") int limit) {
+    public List<JsonNode> topRankedNodes(@PathVariable String moduleId, @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<JsonNode> result = new LinkedList<>();
 
-        NodeRankModule module = ProductionRuntime.getRuntime(database).getModule(moduleId, NodeRankModule.class);
+        NodeRankModule module = RuntimeRegistry.getStartedRuntime(database).getModule(moduleId, NodeRankModule.class);
 
         try (Transaction tx = database.beginTx()) {
             for (Node node : module.getTopNodes().getTopNodes()) {
