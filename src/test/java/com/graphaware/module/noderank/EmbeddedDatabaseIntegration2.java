@@ -4,10 +4,9 @@ import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
 import com.graphaware.runtime.RuntimeRegistry;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.List;
@@ -29,9 +28,9 @@ public class EmbeddedDatabaseIntegration2 {
 
         Thread.sleep(2000);
 
-        ExecutionResult executionResult = new ExecutionEngine(database).execute("MATCH (p:Person) WHERE p.nodeRank > 0 RETURN p");
+        Result executionResult = database.execute("MATCH (p:Person) WHERE p.nodeRank > 0 RETURN p");
 
-        assertTrue("The page rank module didn't run on startup", executionResult.iterator().hasNext());
+        assertTrue("The page rank module didn't run on startup", executionResult.hasNext());
 
         NodeRankModule nodeRankModule = RuntimeRegistry.getStartedRuntime(database).getModule("NR", NodeRankModule.class);
         List<Node> topNodes = nodeRankModule.getTopNodes().getTopNodes();
@@ -39,8 +38,7 @@ public class EmbeddedDatabaseIntegration2 {
     }
 
     private void populateDatabase(GraphDatabaseService database) {
-        ExecutionEngine engine = new ExecutionEngine(database);
-        engine.execute("CREATE " +
+        database.execute("CREATE " +
                 " (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
                 " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
                 " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'})," +

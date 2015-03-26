@@ -5,8 +5,6 @@ import com.graphaware.common.policy.fluent.IncludeNodes;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.test.integration.DatabaseIntegrationTest;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 
 import java.util.Map;
@@ -17,17 +15,15 @@ import static org.junit.Assert.assertNotNull;
 public class NodeRankModuleTest extends DatabaseIntegrationTest {
 
     private NodeRankModule module;
-    private ExecutionEngine executionEngine;
 
     public void setUp() throws Exception {
         super.setUp();
-        this.executionEngine = new ExecutionEngine(getDatabase());
         this.module = new NodeRankModule("TEST");
     }
 
     @Test
     public void shouldTolerateEmptyContextGivenIfNoPreviousStepsHaveBeenMade() {
-        executionEngine.execute("CREATE (arbitraryNode)-[:RELATES_TO]->(otherNode);");
+        getDatabase().execute("CREATE (arbitraryNode)-[:RELATES_TO]->(otherNode);");
 
         try (Transaction tx = getDatabase().beginTx()) {
             module.doSomeWork(module.createInitialContext(getDatabase()), getDatabase());
@@ -36,10 +32,10 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
 
     @Test
     public void shouldExecuteSingleStepTowardsConvergenceAndUpdateNodePropertiesAccordingly() {
-        ExecutionResult executionResult = executionEngine.execute(
+        Result executionResult = getDatabase().execute(
                 "CREATE (p:Person{name:'Gary'})-[:KNOWS]->(q:Person{name:'Sheila'}) RETURN p, q");
 
-        Map<String, Object> insertionResults = executionResult.iterator().next();
+        Map<String, Object> insertionResults = executionResult.next();
 
         try (Transaction tx = getDatabase().beginTx()) {
             Node startNode = (Node) insertionResults.get("p");
@@ -75,7 +71,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
                 }));
 
         // set up test data and run test
-        ExecutionResult executionResult = executionEngine.execute(
+        Result executionResult = getDatabase().execute(
                 "CREATE (p:Person{name:'Sanjiv'})-[:KNOWS]->(:Person{name:'Lakshmipathy'}),"
                         + " (p)-[:KNOWS]->(:Person{name:'Rajani'}), "
                         + " (p)-[:OWNS]->(:Laptop{manufacturer:'Dell'}), "
@@ -84,7 +80,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
                         + " (p)-[:OWNS]->(:Tablet{manufacturer:'Samsung'}) "
                         + "RETURN p");
 
-        Map<String, Object> insertionResults = executionResult.iterator().next();
+        Map<String, Object> insertionResults = executionResult.next();
 
         try (Transaction tx = getDatabase().beginTx()) {
             Node person = (Node) insertionResults.get("p");
@@ -101,7 +97,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
     public void shouldChooseLegitimateRandomStartNodeInAccordanceWithInclusionStrategy() {
         module = new NodeRankModule("TEST3", NodeRankModuleConfiguration.defaultConfiguration().with(IncludeNodes.all().with("Vegan")));
 
-        executionEngine.execute("CREATE (:Meat{name:'Chicken'}), (:Meat{name:'Mutton'}), (:Vegan{name:'Potato'}), "
+        getDatabase().execute("CREATE (:Meat{name:'Chicken'}), (:Meat{name:'Mutton'}), (:Vegan{name:'Potato'}), "
                 + "(:Vegetarian{name:'Milk'}), (:Vegetarian{name:'Cheese'}), (:Meat{name:'Pork'})");
 
         try (Transaction tx = getDatabase().beginTx()) {
