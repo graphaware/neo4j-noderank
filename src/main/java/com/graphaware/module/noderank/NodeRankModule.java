@@ -110,7 +110,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         try {
             return lastContext.find(database);
         } catch (NotFoundException e) {
-            LOG.warn("Node referenced in last context with ID: {} was not found in the database.  Will start from a random node.");
+            LOG.warn("Node referenced in last context with ID {} was not found in the database.  Will start from a random node.", lastContext);
             return null;
         }
     }
