@@ -110,7 +110,7 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
         try {
             return lastContext.find(database);
         } catch (NotFoundException e) {
-            LOG.warn("Node referenced in last context with ID: {} was not found in the database.  Will start from a random node.");
+            LOG.warn("Node referenced in last context with ID {} was not found in the database.  Will start from a random node.", lastContext);
             return null;
         }
     }
@@ -128,8 +128,8 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
 
         Relationship randomRelationship = relationshipSelector.selectRelationship(currentNode);
         if (randomRelationship == null) {
-            LOG.warn("NodeRank did not find a relationship to follow. Will start from a random node.");
-            return null;
+            LOG.debug("Dead end at {}, selecting a new random node", currentNode);
+            return nodeSelector.selectNode(database);
         }
 
         Node result = randomRelationship.getOtherNode(currentNode);
