@@ -29,7 +29,7 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
                 " (d)-[:FRIEND_OF]->(vi)," +
                 " (v)-[:FRIEND_OF]->(a)");
 
-        Thread.sleep(20000);
+        Thread.sleep(30000);
 
         String s = httpClient.get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
         System.out.println(s);
