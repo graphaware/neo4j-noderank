@@ -32,7 +32,8 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
         Thread.sleep(20000);
 
         String s = httpClient.get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
-        assertTrue(s.contains("{\"id\":0,\"labels\":[\"Person\"],\"name\":\"Michal\",\"nodeRank\""));
+        System.out.println(s);
+        assertTrue(s.contains("[{\"id\":0,\"properties\":{\"name\":\"Michal\",\"nodeRank\":"));
     }
 
     @Test

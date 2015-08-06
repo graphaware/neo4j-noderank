@@ -7,10 +7,7 @@ import com.graphaware.runtime.walk.NodeSelector;
 import com.graphaware.runtime.walk.RandomNodeSelector;
 import com.graphaware.runtime.walk.RandomRelationshipSelector;
 import com.graphaware.runtime.walk.RelationshipSelector;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +65,12 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      */
     @Override
     public NodeRankContext createInitialContext(GraphDatabaseService database) {
-        Node node = nodeSelector.selectNode(database);
+        Node node;
+
+        try (Transaction tx = database.beginTx()) {
+            node = nodeSelector.selectNode(database);
+            tx.success();
+        }
 
         if (node == null) {
             LOG.warn("NodeRank did not find a node to start with. There are no nodes matching the configuration.");
