@@ -1,5 +1,6 @@
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.policy.BaseRelationshipInclusionPolicy;
 import com.graphaware.common.policy.RelationshipInclusionPolicy;
 import com.graphaware.common.policy.fluent.IncludeNodes;
 import com.graphaware.runtime.metadata.NodeBasedContext;
@@ -58,7 +59,7 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
         module = new NodeRankModule("TEST2", NodeRankModuleConfiguration
                 .defaultConfiguration()
                 .with(IncludeNodes.all().with("Car"))
-                .with(new RelationshipInclusionPolicy() {
+                .with(new BaseRelationshipInclusionPolicy() {
                     @Override
                     public boolean include(Relationship relationship) {
                         return relationship.isType(DynamicRelationshipType.withName("OWNS"));
