@@ -35,6 +35,8 @@ public class EmbeddedDatabaseIntegration2 {
         NodeRankModule nodeRankModule = RuntimeRegistry.getStartedRuntime(database).getModule("NR", NodeRankModule.class);
         List<Node> topNodes = nodeRankModule.getTopNodes().getTopNodes();
         assertTrue(topNodes.size() > 0);
+
+        database.shutdown();
     }
 
     private void populateDatabase(GraphDatabaseService database) {

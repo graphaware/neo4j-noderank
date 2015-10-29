@@ -25,6 +25,8 @@ public class EmbeddedDatabaseIntegration  {
         Result executionResult = database.execute("MATCH (p:Person) WHERE p.nodeRank > 0 RETURN p");
 
         assertTrue("The page rank module didn't run on startup", executionResult.hasNext());
+
+        database.shutdown();
     }
 
     private void populateDatabase(GraphDatabaseService database) {
