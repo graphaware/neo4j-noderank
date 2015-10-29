@@ -1,5 +1,6 @@
 package com.graphaware.module.noderank;
 
+import com.graphaware.test.integration.CommunityNeoServerIntegrationTest;
 import com.graphaware.test.integration.NeoServerIntegrationTest;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -7,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import static org.junit.Assert.assertTrue;
 
 
-public class NodeRankApiTest extends NeoServerIntegrationTest {
+public class NodeRankApiTest extends CommunityNeoServerIntegrationTest {
 
     /**
      * {@inheritDoc}
