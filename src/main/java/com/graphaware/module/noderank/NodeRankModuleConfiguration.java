@@ -18,13 +18,14 @@ package com.graphaware.module.noderank;
 
 import com.graphaware.common.policy.NodeInclusionPolicy;
 import com.graphaware.common.policy.RelationshipInclusionPolicy;
+import com.graphaware.runtime.config.BaseTimerDrivenModuleConfiguration;
 import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.policy.all.IncludeAllBusinessRelationships;
 
 /**
  * Configuration settings for the {@link NodeRankModule} with fluent interface.
  */
-public class NodeRankModuleConfiguration {
+public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfiguration<NodeRankModuleConfiguration> {
 
     private final String rankPropertyKey;
     private final NodeInclusionPolicy nodeInclusionPolicy;
@@ -38,7 +39,7 @@ public class NodeRankModuleConfiguration {
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration("nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
+        return new NodeRankModuleConfiguration(InstanceRolePolicy.MASTER_ONLY, "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
     }
 
     /**
@@ -48,7 +49,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withRankPropertyKey(String rankPropertyKey) {
-        return new NodeRankModuleConfiguration(rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -58,7 +59,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(NodeInclusionPolicy nodeInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -68,7 +69,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration with(RelationshipInclusionPolicy relationshipInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes(), getDampingFactor());
     }
 
     /**
@@ -78,7 +79,7 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withMaxTopRankNodes(int maxTopRankNodes) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes, getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes, getDampingFactor());
     }
 
     /**
@@ -88,18 +89,21 @@ public class NodeRankModuleConfiguration {
      * @return new config.
      */
     public NodeRankModuleConfiguration withDampingFactor(double dampingFactor) {
-        return new NodeRankModuleConfiguration(getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), dampingFactor);
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), dampingFactor);
     }
 
     /**
      * Constructs a new {@link NodeRankModuleConfiguration} based on the given configuration details.
      *
+     * @param instanceRolePolicy          specifies which role a machine must have in order to run the module with this configuration. Must not be <code>null</code>.
      * @param rankPropertyKey             name of the property written to the ranked nodes.
      * @param nodeInclusionPolicy         The {@link NodeInclusionPolicy} to use for selecting nodes to include in the rank algorithm.
      * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
      * @param maxTopRankNodes             maximum number of top ranked nodes to remember.
      */
-    private NodeRankModuleConfiguration(String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor) {
+    private NodeRankModuleConfiguration(InstanceRolePolicy instanceRolePolicy, String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor) {
+        super(instanceRolePolicy);
+
         if (maxTopRankNodes < 0) {
             throw new IllegalArgumentException("Max top ranked nodes must be > 0");
         }
@@ -113,6 +117,14 @@ public class NodeRankModuleConfiguration {
         this.relationshipInclusionPolicy = relationshipInclusionPolicy;
         this.maxTopRankNodes = maxTopRankNodes;
         this.dampingFactor = dampingFactor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected NodeRankModuleConfiguration newInstance(InstanceRolePolicy instanceRolePolicy) {
+        return new NodeRankModuleConfiguration(instanceRolePolicy, getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
     }
 
     public String getRankPropertyKey() {

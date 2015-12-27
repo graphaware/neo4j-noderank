@@ -16,8 +16,9 @@
 
 package com.graphaware.module.noderank;
 
+import com.graphaware.runtime.config.TimerDrivenModuleConfiguration;
 import com.graphaware.runtime.metadata.NodeBasedContext;
-import com.graphaware.runtime.module.BaseRuntimeModule;
+import com.graphaware.runtime.module.BaseTimerDrivenModule;
 import com.graphaware.runtime.module.TimerDrivenModule;
 import com.graphaware.runtime.walk.NodeSelector;
 import com.graphaware.runtime.walk.RandomNodeSelector;
@@ -36,7 +37,7 @@ import java.util.Random;
  * Sooner or later, depending on the size and shape of the network, it will converge to values that would be computed
  * by PageRank algorithm (not normalised).
  */
-public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModule<NodeRankContext> {
+public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> implements TimerDrivenModule<NodeRankContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeRankModule.class);
 
@@ -72,8 +73,8 @@ public class NodeRankModule extends BaseRuntimeModule implements TimerDrivenModu
      * {@inheritDoc}
      */
     @Override
-    public void shutdown() {
-        //nothing needed for now
+    public TimerDrivenModuleConfiguration getConfiguration() {
+        return config;
     }
 
     /**
