@@ -16,10 +16,17 @@
 
 package com.graphaware.module.noderank;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphaware.test.integration.NeoServerIntegrationTest;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
@@ -34,7 +41,7 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
     }
 
     @Test
-    public void shouldRetrieveTopNodes() throws InterruptedException {
+    public void shouldRetrieveTopNodes() throws InterruptedException, IOException {
         httpClient.executeCypher(baseUrl(), "CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
                 " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
                 " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'})," +
@@ -45,11 +52,14 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
                 " (d)-[:FRIEND_OF]->(vi)," +
                 " (v)-[:FRIEND_OF]->(a)");
 
-        Thread.sleep(30000);
+        Thread.sleep(20000);
 
         String s = httpClient.get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
-        System.out.println(s);
-        assertTrue(s.contains("[{\"id\":0,\"properties\":{\"name\":\"Michal\",\"nodeRank\":"));
+
+        Map<String, Object> first = (Map<String, Object>) new ObjectMapper().readValue(s, List.class).get(0);
+
+        assertEquals(0, first.get("id"));
+        assertEquals("Michal", ((Map<String, Object>) first.get("properties")).get("name"));
     }
 
     @Test
