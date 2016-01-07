@@ -16,7 +16,8 @@
 
 package com.graphaware.module.noderank;
 
-import com.graphaware.api.JsonNode;
+import com.graphaware.api.json.JsonNode;
+import com.graphaware.api.json.LongIdJsonNode;
 import com.graphaware.runtime.RuntimeRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -54,7 +55,7 @@ public class NodeRankApi {
         try (Transaction tx = database.beginTx()) {
             for (Node node : module.getTopNodes().getTopNodes()) {
                 try {
-                    result.add(new JsonNode(node));
+                    result.add(new LongIdJsonNode(node));
 
                     if (result.size() >= limit) {
                         break;
