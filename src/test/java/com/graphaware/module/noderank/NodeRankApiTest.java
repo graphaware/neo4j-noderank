@@ -50,7 +50,7 @@ public class NodeRankApiTest extends GraphAwareIntegrationTest {
                 " (d)-[:FRIEND_OF]->(vi)," +
                 " (v)-[:FRIEND_OF]->(a)");
 
-        Thread.sleep(20000);
+        Thread.sleep(30000);
 
         String s = httpClient.get(baseUrl() + "/noderank/noderank/", HttpStatus.OK.value());
 
