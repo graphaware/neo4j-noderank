@@ -16,9 +16,8 @@
 
 package com.graphaware.module.noderank;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.graphaware.test.integration.NeoServerIntegrationTest;
+import com.graphaware.test.integration.GraphAwareIntegrationTest;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
@@ -27,22 +26,21 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
-public class NodeRankApiTest extends NeoServerIntegrationTest {
+public class NodeRankApiTest extends GraphAwareIntegrationTest {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected String neo4jConfigFile() {
-        return "int-test-neo4j.properties";
+    protected String configFile() {
+        return "int-test-neo4j.conf";
     }
 
     @Test
     public void shouldRetrieveTopNodes() throws InterruptedException, IOException {
-        httpClient.executeCypher(baseUrl(), "CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
+        httpClient.executeCypher(baseNeoUrl(), "CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
                 " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
                 " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'})," +
                 " (m)-[:FRIEND_OF]->(vi:Person {name:'Vince'})," +
@@ -54,7 +52,7 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
 
         Thread.sleep(20000);
 
-        String s = httpClient.get(baseUrl() + "/graphaware/noderank/noderank/", HttpStatus.OK.value());
+        String s = httpClient.get(baseUrl() + "/noderank/noderank/", HttpStatus.OK.value());
 
         Map<String, Object> first = (Map<String, Object>) new ObjectMapper().readValue(s, List.class).get(0);
 
@@ -64,6 +62,6 @@ public class NodeRankApiTest extends NeoServerIntegrationTest {
 
     @Test
     public void requestToUnknownModuleShouldProduce404() throws InterruptedException {
-        httpClient.get(baseUrl() + "/graphaware/noderank/unknown/",  HttpStatus.NOT_FOUND.value());
+        httpClient.get(baseUrl() + "/noderank/unknown/",  HttpStatus.NOT_FOUND.value());
     }
 }

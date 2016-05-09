@@ -20,6 +20,7 @@ import com.graphaware.common.policy.BaseRelationshipInclusionPolicy;
 import com.graphaware.common.policy.fluent.IncludeNodes;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.test.integration.DatabaseIntegrationTest;
+import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
 import org.neo4j.graphdb.*;
 
@@ -28,7 +29,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class NodeRankModuleTest extends DatabaseIntegrationTest {
+public class NodeRankModuleTest extends EmbeddedDatabaseIntegrationTest {
 
     private NodeRankModule module;
 
@@ -77,12 +78,12 @@ public class NodeRankModuleTest extends DatabaseIntegrationTest {
                 .with(new BaseRelationshipInclusionPolicy() {
                     @Override
                     public boolean include(Relationship relationship) {
-                        return relationship.isType(DynamicRelationshipType.withName("OWNS"));
+                        return relationship.isType(RelationshipType.withName("OWNS"));
                     }
 
                     @Override
                     public boolean include(Relationship relationship, Node pointOfView) {
-                        return include(relationship) && relationship.getOtherNode(pointOfView).hasLabel(DynamicLabel.label("Car"));
+                        return include(relationship) && relationship.getOtherNode(pointOfView).hasLabel(Label.label("Car"));
                     }
                 }));
 

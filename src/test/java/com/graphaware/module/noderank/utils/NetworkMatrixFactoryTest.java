@@ -17,20 +17,19 @@
 package com.graphaware.module.noderank.utils;
 
 import com.graphaware.test.integration.DatabaseIntegrationTest;
+import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import static org.junit.Assert.assertEquals;
 
 
-public class NetworkMatrixFactoryTest extends DatabaseIntegrationTest {
+public class NetworkMatrixFactoryTest extends EmbeddedDatabaseIntegrationTest {
 
     @Override
     public void populateDatabase(GraphDatabaseService database) {
-        ExecutionEngine engine = new ExecutionEngine(database);
-        engine.execute( "CREATE " +
+        database.execute( "CREATE " +
                 " (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'}),"+
                 " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'}),"+
                 " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'}),"+

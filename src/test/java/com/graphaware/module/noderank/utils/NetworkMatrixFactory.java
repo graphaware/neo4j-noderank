@@ -23,7 +23,6 @@ import org.la4j.matrix.sparse.CRSMatrix;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.graphaware.common.util.IterableUtils.count;
-import static org.neo4j.tooling.GlobalGraphOperations.at;
 
 /**
  * Exports the entire graph as adjacency matrix.
@@ -87,7 +85,7 @@ public class NetworkMatrixFactory {
 
         Map<Long, Integer> indices = matrixNodeIndices(database);
 
-        for (Relationship r : at(database).getAllRelationships()) {
+        for (Relationship r : database.getAllRelationships()) {
             populator.populate(adjacency, indices, r.getStartNode(), r.getEndNode());
         }
 
@@ -103,7 +101,7 @@ public class NetworkMatrixFactory {
     private Map<Long, Integer> matrixNodeIndices(GraphDatabaseService database) {
         int count = 0;
         Map<Long, Integer> result = new LinkedHashMap<>();
-        for (Node node : GlobalGraphOperations.at(database).getAllNodes()) {
+        for (Node node : database.getAllNodes()) {
             result.put(node.getId(), count++);
         }
         return result;
@@ -137,7 +135,7 @@ public class NetworkMatrixFactory {
     }
 
     private int countNodes() {
-        long length = count(at(database).getAllNodes());
+        long length = count(database.getAllNodes());
 
         if (length > Integer.MAX_VALUE) {
             throw new IllegalStateException("Too many nodes in the database");

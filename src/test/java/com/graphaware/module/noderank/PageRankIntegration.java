@@ -31,10 +31,10 @@ import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
 import com.graphaware.test.integration.DatabaseIntegrationTest;
+import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Integration tests for page rank module.
  */
-public class PageRankIntegration extends DatabaseIntegrationTest {
+public class PageRankIntegration extends EmbeddedDatabaseIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageRankIntegration.class);
 
@@ -105,7 +105,7 @@ public class PageRankIntegration extends DatabaseIntegrationTest {
         ArrayList<RankNodePair> nodeRank = new ArrayList<>();
 
         try (Transaction tx = getDatabase().beginTx()) {
-            for (Node node : GlobalGraphOperations.at(getDatabase()).getAllNodes()) {
+            for (Node node : getDatabase().getAllNodes()) {
                 if (IncludeAllBusinessNodes.getInstance().include(node)) {
                     nodeRank.add(new RankNodePair((int) node.getProperty("nodeRank", 0), node.getId()));
                 }

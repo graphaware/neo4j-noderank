@@ -17,6 +17,7 @@
 package com.graphaware.module.noderank;
 
 import com.graphaware.test.integration.DatabaseIntegrationTest;
+import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.when;
 /**
  * Unit test for {@link NodeRankContext}.
  */
-public class TopRankedNodesTest extends DatabaseIntegrationTest {
+public class TopRankedNodesTest extends EmbeddedDatabaseIntegrationTest {
 
     @Test
     public void emptyTopNodesShouldProduceEmptyList() {
