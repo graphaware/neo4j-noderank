@@ -22,6 +22,9 @@ import com.graphaware.runtime.config.function.StringToNodeInclusionPolicy;
 import com.graphaware.runtime.config.function.StringToRelationshipInclusionPolicy;
 import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.impl.proc.Procedures;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +78,13 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
             RelationshipInclusionPolicy policy = StringToRelationshipInclusionPolicy.getInstance().apply(config.get(RELATIONSHIP));
             LOG.info("Relationship Inclusion Policy set to {}", policy);
             configuration = configuration.with(policy);
+        }
+
+        try {
+            ((GraphDatabaseAPI) database).getDependencyResolver().resolveDependency(Procedures.class).register(NodeRankProcedure.class);
+            LOG.info("Sucessfully registered noderank procedure");
+        } catch (KernelException e) {
+            LOG.warn("Unable to register the noderank procedure");
         }
 
         return new NodeRankModule(moduleId, configuration);
