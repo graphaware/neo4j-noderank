@@ -28,7 +28,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 
-public class NodeRankApiTest extends GraphAwareIntegrationTest {
+public class NodeRankControllerTest extends GraphAwareIntegrationTest {
 
     /**
      * {@inheritDoc}

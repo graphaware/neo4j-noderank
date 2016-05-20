@@ -121,7 +121,16 @@ Using GraphAware NodeRank
 
 ### Cypher
 
-coming soon
+The `ga.noderank.getTopRanked` procedure call can be used in Cypher to get a list of top ranked nodes, ordered by decreasing rank.
+
+```
+CALL ga.noderank.getTopRanked("moduleId", 10) YIELD node RETURN node
+```
+
+There are 2 arguments to pass to the call :
+
+* `moduleId`: a string representing the name of the module id you used to register the module in the configuration
+* `limit` : an integer used to determine the size of the returned list of nodes
 
 ### REST API
 
