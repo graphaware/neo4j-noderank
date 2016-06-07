@@ -16,6 +16,7 @@
 
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.log.LoggerFactory;
 import com.graphaware.common.policy.NodeInclusionPolicy;
 import com.graphaware.common.policy.RelationshipInclusionPolicy;
 import com.graphaware.runtime.config.function.StringToNodeInclusionPolicy;
