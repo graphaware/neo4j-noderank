@@ -16,11 +16,11 @@
 
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.log.LoggerFactory;
 import com.graphaware.common.util.BoundedSortedList;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.neo4j.logging.Log;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class TopRankedNodes {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TopRankedNodes.class);
+    private static final Log LOG = LoggerFactory.getLogger(TopRankedNodes.class);
 
     private BoundedSortedList<Node, Integer> topNodes;
 

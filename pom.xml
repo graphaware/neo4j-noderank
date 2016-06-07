@@ -18,12 +18,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>noderank</artifactId>
-    <version>3.0.1.38.3-SNAPSHOT</version>
+    <version>3.0.2.39.2-SNAPSHOT</version>
 
     <parent>
         <groupId>com.graphaware.neo4j</groupId>
         <artifactId>module-parent</artifactId>
-        <version>3.0.1.38</version>
+        <version>3.0.2.39</version>
     </parent>
 
     <name>GraphAware Neo4j Node Rank Module</name>
@@ -105,7 +105,7 @@
 
         <dependency>
             <groupId>com.graphaware.neo4j</groupId>
-            <version>3.0.1.38.5</version>
+            <version>3.0.2.39.5</version>
             <artifactId>algorithms</artifactId>
             <scope>test</scope>
         </dependency>

@@ -16,14 +16,14 @@
 
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.log.LoggerFactory;
 import com.graphaware.common.policy.NodeInclusionPolicy;
 import com.graphaware.common.policy.RelationshipInclusionPolicy;
 import com.graphaware.runtime.config.function.StringToNodeInclusionPolicy;
 import com.graphaware.runtime.config.function.StringToRelationshipInclusionPolicy;
 import com.graphaware.runtime.module.RuntimeModuleBootstrapper;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.neo4j.logging.Log;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
+    private static final Log LOG = LoggerFactory.getLogger(NodeRankModuleBootstrapper.class);
 
     private static final String MAX_TOP_RANK_NODES = "maxTopRankNodes";
     private static final String DAMPING = "dampingFactor";
@@ -46,7 +46,7 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
     @Override
     public NodeRankModule bootstrapModule(String moduleId, Map<String, String> config, GraphDatabaseService database) {
         LOG.info("Constructing new module with ID: {}", moduleId);
-        LOG.trace("Configuration parameter map is: {}", config);
+        LOG.debug("Configuration parameter map is: {}", config);
 
         NodeRankModuleConfiguration configuration = NodeRankModuleConfiguration.defaultConfiguration();
 

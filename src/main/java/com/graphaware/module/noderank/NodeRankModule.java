@@ -16,6 +16,7 @@
 
 package com.graphaware.module.noderank;
 
+import com.graphaware.common.log.LoggerFactory;
 import com.graphaware.runtime.config.TimerDrivenModuleConfiguration;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.runtime.module.BaseTimerDrivenModule;
@@ -25,8 +26,7 @@ import com.graphaware.runtime.walk.RandomNodeSelector;
 import com.graphaware.runtime.walk.RandomRelationshipSelector;
 import com.graphaware.runtime.walk.RelationshipSelector;
 import org.neo4j.graphdb.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.neo4j.logging.Log;
 
 import java.util.Random;
 
@@ -39,7 +39,7 @@ import java.util.Random;
  */
 public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> implements TimerDrivenModule<NodeRankContext> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NodeRankModule.class);
+    private static final Log LOG = LoggerFactory.getLogger(NodeRankModule.class);
 
     private final NodeRankModuleConfiguration config;
     private final NodeSelector nodeSelector;
