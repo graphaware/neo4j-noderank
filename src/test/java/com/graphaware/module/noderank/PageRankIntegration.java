@@ -129,7 +129,7 @@ public class PageRankIntegration extends EmbeddedDatabaseIntegrationTest {
 
         GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(getDatabase(),
                 FluentRuntimeConfiguration
-                        .defaultConfiguration()
+                        .defaultConfiguration(getDatabase())
                         .withTimingStrategy(timingStrategy));
         runtime.registerModule(nodeRankModule);
         runtime.start();
