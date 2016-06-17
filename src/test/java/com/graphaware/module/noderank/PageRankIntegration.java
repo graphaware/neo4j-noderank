@@ -74,7 +74,7 @@ public class PageRankIntegration extends EmbeddedDatabaseIntegrationTest {
         final int numberOfNodes = 50;
         GraphGenerator graphGenerator = new Neo4jGraphGenerator(getDatabase());
 
-        LOG.info("Generating Barabasi-Albert social network graph with {} nodes...", numberOfNodes);
+        LOG.info("Generating Barabasi-Albert social network graph with %s nodes...", numberOfNodes);
 
         graphGenerator.generateGraph(new BasicGeneratorConfig(new BarabasiAlbertRelationshipGenerator(
                 new BarabasiAlbertConfig(numberOfNodes, 10)),
@@ -180,8 +180,8 @@ public class PageRankIntegration extends EmbeddedDatabaseIntegrationTest {
          */
         Permutation<RankNodePair> pageRankToNodeRankPermutation = new Permutation<>(pageRankPairs, nodeRankPairs);
         LOG.info("The un-normed Lehmer distance of pageRank to nodeRank is: " + pageRankToNodeRankPermutation.getPermutationIndex().toString());
-        LOG.info("Lehmer distance ratio: {} ", pageRankToNodeRankPermutation.getNormedPermutationIndex());
-        LOG.info("Lehmer log-distance ratio: {} ", pageRankToNodeRankPermutation.getLogNormedPermutationIndex());
+        LOG.info("Lehmer distance ratio: %s ", pageRankToNodeRankPermutation.getNormedPermutationIndex());
+        LOG.info("Lehmer log-distance ratio: %s ", pageRankToNodeRankPermutation.getLogNormedPermutationIndex());
 
         assertTrue(pageRankToNodeRankPermutation.getNormedPermutationIndex() * 100 > 90);
     }

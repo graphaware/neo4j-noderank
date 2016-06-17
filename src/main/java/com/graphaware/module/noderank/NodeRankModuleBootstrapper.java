@@ -48,35 +48,35 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
      */
     @Override
     public NodeRankModule bootstrapModule(String moduleId, Map<String, String> config, GraphDatabaseService database) {
-        LOG.info("Constructing new module with ID: {}", moduleId);
-        LOG.debug("Configuration parameter map is: {}", config);
+        LOG.info("Constructing new module with ID: %s", moduleId);
+        LOG.debug("Configuration parameter map is: %s", config);
 
         NodeRankModuleConfiguration configuration = NodeRankModuleConfiguration.defaultConfiguration();
 
         if (config.get(PROPERTY_KEY) != null) {
-            LOG.info("Property key set to {}", config.get(PROPERTY_KEY));
+            LOG.info("Property key set to %s", config.get(PROPERTY_KEY));
             configuration = configuration.withRankPropertyKey(config.get(PROPERTY_KEY));
         }
 
         if (config.get(MAX_TOP_RANK_NODES) != null) {
-            LOG.info("Max top rank nodes set to {}", config.get(MAX_TOP_RANK_NODES));
+            LOG.info("Max top rank nodes set to %s", config.get(MAX_TOP_RANK_NODES));
             configuration = configuration.withMaxTopRankNodes(Integer.valueOf(config.get(MAX_TOP_RANK_NODES)));
         }
 
         if (config.get(DAMPING) != null) {
-            LOG.info("Damping factor set to {}", config.get(DAMPING));
+            LOG.info("Damping factor set to %s", config.get(DAMPING));
             configuration = configuration.withDampingFactor(Double.valueOf(config.get(DAMPING)));
         }
 
         if (config.get(NODE) != null) {
             NodeInclusionPolicy policy = StringToNodeInclusionPolicy.getInstance().apply(config.get(NODE));
-            LOG.info("Node Inclusion Policy set to {}", policy);
+            LOG.info("Node Inclusion Policy set to %s", policy);
             configuration = configuration.with(policy);
         }
 
         if (config.get(RELATIONSHIP) != null) {
             RelationshipInclusionPolicy policy = StringToRelationshipInclusionPolicy.getInstance().apply(config.get(RELATIONSHIP));
-            LOG.info("Relationship Inclusion Policy set to {}", policy);
+            LOG.info("Relationship Inclusion Policy set to %s", policy);
             configuration = configuration.with(policy);
         }
 

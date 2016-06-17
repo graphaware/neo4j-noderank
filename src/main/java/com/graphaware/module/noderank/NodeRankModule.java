@@ -129,7 +129,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         try {
             return lastContext.find(database);
         } catch (NotFoundException e) {
-            LOG.warn("Node referenced in last context with ID {} was not found in the database.  Will start from a random node.", lastContext);
+            LOG.warn("Node referenced in last context with ID %s was not found in the database.  Will start from a random node.", lastContext);
             return null;
         }
     }
@@ -147,7 +147,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
 
         Relationship randomRelationship = relationshipSelector.selectRelationship(currentNode);
         if (randomRelationship == null) {
-            LOG.debug("Dead end at {}, selecting a new random node", currentNode);
+            LOG.debug("Dead end at %s, selecting a new random node", currentNode);
             return nodeSelector.selectNode(database);
         }
 
