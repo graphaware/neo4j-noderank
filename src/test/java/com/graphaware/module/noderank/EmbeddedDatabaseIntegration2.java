@@ -55,6 +55,17 @@ public class EmbeddedDatabaseIntegration2 {
         database.shutdown();
     }
 
+    @Test
+    public void shouldSuccessfullyStartWhenMoreThanOneModuleDefinitionIsConfigured() {
+        GraphDatabaseService database = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+                .loadPropertiesFromFile("src/test/resources/neo4j-2.conf")
+                .newGraphDatabase();
+
+        RuntimeRegistry.getStartedRuntime(database);
+        assertTrue(true);
+        database.shutdown();
+    }
+
     private void populateDatabase(GraphDatabaseService database) {
         database.execute("CREATE " +
                 " (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +

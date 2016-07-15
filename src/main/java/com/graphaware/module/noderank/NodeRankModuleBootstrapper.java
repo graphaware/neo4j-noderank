@@ -80,13 +80,6 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
             configuration = configuration.with(policy);
         }
 
-        try {
-            ((GraphDatabaseAPI) database).getDependencyResolver().resolveDependency(Procedures.class).register(NodeRankProcedure.class);
-            LOG.info("Sucessfully registered noderank procedure");
-        } catch (KernelException e) {
-            LOG.warn("Unable to register the noderank procedure");
-        }
-
         return new NodeRankModule(moduleId, configuration);
     }
 
