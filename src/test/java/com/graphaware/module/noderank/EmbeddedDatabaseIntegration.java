@@ -29,7 +29,7 @@ public class EmbeddedDatabaseIntegration  {
     @Test
     public void shouldSuccessfullyInitialiseAndRunModuleWhenDatabaseIsStarted() throws InterruptedException {
         GraphDatabaseService database = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                .loadPropertiesFromFile("src/test/resources/test-neo4j.properties")
+                .loadPropertiesFromFile("src/test/resources/test-neo4j.conf")
                 .newGraphDatabase();
 
         RuntimeRegistry.getStartedRuntime(database);

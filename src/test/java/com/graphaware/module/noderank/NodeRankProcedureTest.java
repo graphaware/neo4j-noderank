@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.impl.factory.GraphDatabaseFacade;
+import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -15,6 +17,16 @@ import static org.junit.Assert.*;
 
 public class NodeRankProcedureTest extends GraphAwareIntegrationTest {
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        //this is a hack - Neo4j doesn't detect procedures on the classpath that aren't packaged up as .jars.
+        //in the next release, the Framework will provide a better way of doing this
+        Procedures procedures = ((GraphDatabaseFacade) getDatabase()).getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.register(NodeRankProcedure.class);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -24,7 +36,7 @@ public class NodeRankProcedureTest extends GraphAwareIntegrationTest {
     }
 
     @Test
-    public void testProcedureCall() throws InterruptedException, IOException{
+    public void testProcedureCall() throws InterruptedException, IOException {
         try (Transaction tx = getDatabase().beginTx()) {
             getDatabase().execute("CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
                     " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
