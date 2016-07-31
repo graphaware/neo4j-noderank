@@ -17,16 +17,6 @@ import static org.junit.Assert.*;
 
 public class NodeRankProcedureTest extends GraphAwareIntegrationTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        //this is a hack - Neo4j doesn't detect procedures on the classpath that aren't packaged up as .jars.
-        //in the next release, the Framework will provide a better way of doing this
-        Procedures procedures = ((GraphDatabaseFacade) getDatabase()).getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.register(NodeRankProcedure.class);
-    }
-
     /**
      * {@inheritDoc}
      */
