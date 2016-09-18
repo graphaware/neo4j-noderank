@@ -31,13 +31,17 @@ import com.graphaware.runtime.config.FluentRuntimeConfiguration;
 import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
+import com.graphaware.test.data.CypherFilesPopulator;
+import com.graphaware.test.data.DatabasePopulator;
 import com.graphaware.test.integration.DatabaseIntegrationTest;
 import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.logging.Log;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,27 +63,25 @@ public class PageRankIntegration extends EmbeddedDatabaseIntegrationTest {
         this.nodeRankModule = new NodeRankModule("TEST");
     }
 
+    @Override
+    protected DatabasePopulator databasePopulator() {
+        return new CypherFilesPopulator() {
+            @Override
+            protected String[] files() throws IOException {
+                return new String[]{
+                        new ClassPathResource("schema.cyp").getFile().getAbsolutePath(),
+                        new ClassPathResource("graph.cyp").getFile().getAbsolutePath()};
+            }
+        };
+    }
+
     @Test
     public void verifyRandomWalkerModuleGeneratesReasonablePageRank() {
-        generateGraph();
-
         List<RankNodePair> pageRank = computePageRank(new NetworkMatrixFactory(getDatabase()));
 
         List<RankNodePair> nodeRank = computeNodeRank();
 
         analyseResults(pageRank, nodeRank);
-    }
-
-    private void generateGraph() {
-        final int numberOfNodes = 50;
-        GraphGenerator graphGenerator = new Neo4jGraphGenerator(getDatabase());
-
-        LOG.info("Generating Barabasi-Albert social network graph with %s nodes...", numberOfNodes);
-
-        graphGenerator.generateGraph(new BasicGeneratorConfig(new BarabasiAlbertRelationshipGenerator(
-                new BarabasiAlbertConfig(numberOfNodes, 10)),
-                SocialNetworkNodeCreator.getInstance(),
-                SocialNetworkRelationshipCreator.getInstance()));
     }
 
     private List<RankNodePair> computePageRank(NetworkMatrixFactory networkMatrixFactory) {
