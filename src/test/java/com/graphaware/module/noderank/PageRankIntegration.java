@@ -17,13 +17,6 @@
 package com.graphaware.module.noderank;
 
 import com.graphaware.common.log.LoggerFactory;
-import com.graphaware.module.algo.generator.GraphGenerator;
-import com.graphaware.module.algo.generator.Neo4jGraphGenerator;
-import com.graphaware.module.algo.generator.config.BarabasiAlbertConfig;
-import com.graphaware.module.algo.generator.config.BasicGeneratorConfig;
-import com.graphaware.module.algo.generator.node.SocialNetworkNodeCreator;
-import com.graphaware.module.algo.generator.relationship.BarabasiAlbertRelationshipGenerator;
-import com.graphaware.module.algo.generator.relationship.SocialNetworkRelationshipCreator;
 import com.graphaware.module.noderank.utils.*;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
@@ -33,7 +26,6 @@ import com.graphaware.runtime.schedule.FixedDelayTimingStrategy;
 import com.graphaware.runtime.schedule.TimingStrategy;
 import com.graphaware.test.data.CypherFilesPopulator;
 import com.graphaware.test.data.DatabasePopulator;
-import com.graphaware.test.integration.DatabaseIntegrationTest;
 import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;

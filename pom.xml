@@ -105,13 +105,6 @@
 
         <dependency>
             <groupId>com.graphaware.neo4j</groupId>
-            <version>3.0.4.43.5</version>
-            <artifactId>algorithms</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.graphaware.neo4j</groupId>
             <artifactId>server</artifactId>
         </dependency>
 
