@@ -90,7 +90,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         }
 
         if (node == null) {
-            LOG.warn("NodeRank did not find a node to start with. There are no nodes matching the configuration.");
+            LOG.debug("NodeRank did not find a node to start with. There are no nodes matching the configuration.");
             return null;
         }
 
@@ -109,7 +109,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         Node nextNode = determineNextNode(lastNode, database);
 
         if (nextNode == null) {
-            LOG.warn("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
+            LOG.debug("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
             return lastContext;
         }
 
@@ -129,7 +129,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         try {
             return lastContext.find(database);
         } catch (NotFoundException e) {
-            LOG.warn("Node referenced in last context with ID %s was not found in the database.  Will start from a random node.", lastContext);
+            LOG.debug("Node referenced in last context with ID %s was not found in the database.  Will start from a random node.", lastContext);
             return null;
         }
     }
@@ -154,7 +154,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         Node result = randomRelationship.getOtherNode(currentNode);
 
         if (!config.getNodeInclusionPolicy().include(result)) {
-            LOG.warn("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
+            LOG.debug("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
                     "is not included by the Node Inclusion Policy. This is likely a mis-configuration");
         }
 
