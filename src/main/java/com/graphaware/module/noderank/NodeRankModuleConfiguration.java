@@ -39,7 +39,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration(InstanceRolePolicy.MASTER_ONLY, "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
+        return new NodeRankModuleConfiguration(InstanceRolePolicy.ANY, "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
     }
 
     /**
