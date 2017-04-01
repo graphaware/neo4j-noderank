@@ -31,9 +31,9 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 
+import com.graphaware.common.policy.role.WritableRole;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
-import com.graphaware.runtime.config.TimerDrivenModuleConfiguration;
 import com.graphaware.test.data.DatabasePopulator;
 import com.graphaware.test.integration.cluster.CausalClusterDatabasesintegrationTest;
 
@@ -58,7 +58,7 @@ public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesin
 	protected void registerModule(GraphDatabaseService db) throws Exception {
 		GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(db);
         NodeRankModuleConfiguration config = NodeRankModuleConfiguration.defaultConfiguration()
-        .with(TimerDrivenModuleConfiguration.InstanceRolePolicy.LEADER_ONLY)
+        .with(WritableRole.getInstance())
         .withMaxTopRankNodes(3);
 		runtime.registerModule(new NodeRankModule("noderank",config));
         runtime.start();

@@ -106,7 +106,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
 	public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
 		NodeRankContext result = lastContext;
 
-		if ( ! new InstanceRoleUtils(database).isReadOnly()) {
+		if ( ! new InstanceRoleUtils(database).getInstaceRole().isReadOnly()) {
 			//when the instance can write, the topNodes are initialized by the context
 			//when the instance become master/leader (after election), starts from sharing data in the context
 			topNodes.initializeIfNeeded(lastContext, database, config);

@@ -15,7 +15,8 @@
  */
 package com.graphaware.module.noderank;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,9 +31,9 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 
+import com.graphaware.common.policy.role.MasterOnly;
 import com.graphaware.runtime.GraphAwareRuntime;
 import com.graphaware.runtime.GraphAwareRuntimeFactory;
-import com.graphaware.runtime.config.TimerDrivenModuleConfiguration;
 import com.graphaware.test.data.DatabasePopulator;
 import com.graphaware.test.integration.cluster.HighAvailabilityClusterDatabasesIntegrationTest;
 
@@ -55,7 +56,7 @@ public class NodeRankProcedureTestHighAvailability extends HighAvailabilityClust
 	protected void registerModule(GraphDatabaseService db) throws Exception {
 		GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(db);
 		NodeRankModuleConfiguration config = NodeRankModuleConfiguration.defaultConfiguration()
-		        .with(TimerDrivenModuleConfiguration.InstanceRolePolicy.MASTER_ONLY)
+		        .with(MasterOnly.getInstance())
 		        .withMaxTopRankNodes(3);
 		runtime.registerModule(new NodeRankModule("noderank",config));
         runtime.start();
