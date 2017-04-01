@@ -103,33 +103,23 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
      * {@inheritDoc}
      */
     @Override
-	public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
-		NodeRankContext result = lastContext;
+    public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
+        topNodes.initializeIfNeeded(lastContext, database, config);
 
-		if ( ! new InstanceRoleUtils(database).getInstaceRole().isReadOnly()) {
-			//when the instance can write, the topNodes are initialized by the context
-			//when the instance become master/leader (after election), starts from sharing data in the context
-			topNodes.initializeIfNeeded(lastContext, database, config);
+        Node lastNode = determineLastNode(lastContext, database);
+        Node nextNode = determineNextNode(lastNode, database);
 
-			Node lastNode = determineLastNode(lastContext, database);
-			Node nextNode = determineNextNode(lastNode, database);
+        if (nextNode == null) {
+            LOG.debug("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
+            return lastContext;
+        }
 
-			if (nextNode == null) {
-				LOG.debug("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
-				return lastContext;
-			}
+        int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
+        nextNode.setProperty(config.getRankPropertyKey(), rankValue);
+        topNodes.addNode(nextNode, rankValue);
 
-			int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
-
-			nextNode.setProperty(config.getRankPropertyKey(), rankValue);
-
-			topNodes.addNode(nextNode, rankValue);
-
-			result = new NodeRankContext(nextNode, topNodes.getTopNodeIds());
-		}
-
-		return result;
-	}
+        return new NodeRankContext(nextNode, topNodes.getTopNodeIds());
+    }
 
     private Node determineLastNode(NodeBasedContext lastContext, GraphDatabaseService database) {
         if (lastContext == null) {

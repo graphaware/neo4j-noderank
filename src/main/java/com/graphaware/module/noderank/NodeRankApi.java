@@ -16,65 +16,45 @@
 
 package com.graphaware.module.noderank;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.Validate;
-import org.neo4j.graphdb.DependencyResolver;
+import com.graphaware.runtime.RuntimeRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.kernel.impl.core.GraphProperties;
-import org.neo4j.kernel.impl.core.NodeManager;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.Transaction;
 
-import com.graphaware.common.serialize.Serializer;
-import com.graphaware.runtime.metadata.DefaultTimerDrivenModuleMetadata;
+import java.util.LinkedList;
+import java.util.List;
 
 public class NodeRankApi {
 
-	private final GraphDatabaseService database;
+    private final GraphDatabaseService database;
 
-	public NodeRankApi(GraphDatabaseService database) {
-		this.database = database;
-	}
+    public NodeRankApi(GraphDatabaseService database) {
+        this.database = database;
+    }
 
-	/**
-	 * Need to be call during a transaction
-	 * 
-	 * @param moduleId
-	 * @param limit
-	 * @return
-	 */
-	public List<Node> getTopRankedNodes(String moduleId, int limit) {
-		List<Node> result = new LinkedList<>();
+    public List<Node> getTopRankedNodes(String moduleId, int limit) {
+        List<Node> result = new LinkedList<>();
+        NodeRankModule module = RuntimeRegistry.getStartedRuntime(database).getModule(moduleId, NodeRankModule.class);
 
-		DependencyResolver dependencyResolver = ((GraphDatabaseAPI) database).getDependencyResolver();
-		NodeManager resolveDependency = dependencyResolver.resolveDependency(NodeManager.class);		
-		GraphProperties properties = resolveDependency.newGraphProperties();
-		Map<String, Object> allProperties = properties.getAllProperties();
-		List<String> collect = allProperties.keySet().stream().filter(k -> k.contains(moduleId)).collect(Collectors.toList());
-		
-		// not synchronized yet or don't exists
-		if(collect.isEmpty()){
-			throw new NotFoundException("No module with ID " + moduleId + " has been registered");
-		}
-		
-		String key = collect.get(0);
-		Object v = allProperties.get(key);
-		byte[] array = (byte[]) v;
-		DefaultTimerDrivenModuleMetadata metadata = Serializer.fromByteArray(array);
-		NodeRankContext lastContext = (NodeRankContext) metadata.lastContext();
-		if (lastContext != null) {
-			Long[] topNodes = lastContext.getTopNodes();
-			for (Long id : topNodes) {
-				Node node = database.getNodeById(id);
-				result.add(node);
-			}
-		}
-		return result;
-	}
+        try (Transaction tx = database.beginTx()) {
+            for (Node node : module.getTopNodes().getTopNodes()) {
+                try {
+                    result.add(node);
+
+                    if (result.size() >= limit) {
+                        break;
+                    }
+
+                } catch (NotFoundException e) {
+                    //oh well, deleted in the meantime
+                }
+            }
+
+            tx.success();
+        }
+
+        return result;
+    }
 
 }

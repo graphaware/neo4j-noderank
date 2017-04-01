@@ -41,94 +41,92 @@ import com.graphaware.test.integration.cluster.CausalClusterDatabasesintegration
  *
  */
 public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesintegrationTest {
-	
-	private static boolean initialized = false;
-	
-	@Override
-	protected boolean shouldRegisterModules() {
-		return true;
-	}
 
-	@Override
-	protected boolean shouldRegisterProcedures() {
-		return true;
-	}
-	
-	@Override
-	protected void registerModule(GraphDatabaseService db) throws Exception {
-		GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(db);
+    private static boolean initialized = false;
+
+    @Override
+    protected boolean shouldRegisterModules() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldRegisterProcedures() {
+        return true;
+    }
+
+    @Override
+    protected void registerModule(GraphDatabaseService db) throws Exception {
+        GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(db);
         NodeRankModuleConfiguration config = NodeRankModuleConfiguration.defaultConfiguration()
-        .with(WritableRole.getInstance())
-        .withMaxTopRankNodes(3);
-		runtime.registerModule(new NodeRankModule("noderank",config));
+                .with(WritableRole.getInstance())
+                .withMaxTopRankNodes(3);
+        runtime.registerModule(new NodeRankModule("noderank", config));
         runtime.start();
-	}
+    }
 
-	@Override
-	protected void registerProcedures(Procedures procedures) throws Exception {
-		procedures.registerProcedure(NodeRankProcedure.class);
-	}
-	
-	@Override
-	protected DatabasePopulator databasePopulator() {
-		return new DatabasePopulator() {
-			
-			@Override
-			public void populate(GraphDatabaseService database) {
-				try(Transaction tx = database.beginTx();){
-	            database.execute("CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
-	                    " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
-	                    " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'})," +
-	                    " (m)-[:FRIEND_OF]->(vi:Person {name:'Vince'})," +
-	                    " (m)-[:FRIEND_OF]->(:Person {name:'Luanne'})," +
-	                    " (vi)-[:FRIEND_OF]->(a)," +
-	                    " (d)-[:FRIEND_OF]->(a)," +
-	                    " (d)-[:FRIEND_OF]->(vi)," +
-	                    " (v)-[:FRIEND_OF]->(a)");
-	            tx.success();
-				}
-				
-			}
-		};
-	}
-	
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		if(! initialized){
-			
-			GraphDatabaseService database = getOneReplicaDatabase();
-			//wait for ranking synch to replica
-			int count = 0;
-			do{
-				count = 0;
-		        try (Transaction tx = database.beginTx()) {
-		            Result result = database.execute("MATCH (node:Person) RETURN node");
+    @Override
+    protected void registerProcedures(Procedures procedures) throws Exception {
+        procedures.registerProcedure(NodeRankProcedure.class);
+    }
+
+    @Override
+    protected DatabasePopulator databasePopulator() {
+        return database -> {
+            try (Transaction tx = database.beginTx()) {
+                database.execute("CREATE (m:Person {name:'Michal'})-[:FRIEND_OF]->(d:Person {name:'Daniela'})," +
+                        " (m)-[:FRIEND_OF]->(v:Person {name:'Vojta'})," +
+                        " (m)-[:FRIEND_OF]->(a:Person {name:'Adam'})," +
+                        " (m)-[:FRIEND_OF]->(vi:Person {name:'Vince'})," +
+                        " (m)-[:FRIEND_OF]->(:Person {name:'Luanne'})," +
+                        " (vi)-[:FRIEND_OF]->(a)," +
+                        " (d)-[:FRIEND_OF]->(a)," +
+                        " (d)-[:FRIEND_OF]->(vi)," +
+                        " (v)-[:FRIEND_OF]->(a)");
+                tx.success();
+            }
+
+        };
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        if (!initialized) {
+
+            GraphDatabaseService database = getOneReplicaDatabase();
+            //wait for ranking synch to replica
+            int count = 0;
+            do {
+                count = 0;
+                try (Transaction tx = database.beginTx()) {
+                    Result result = database.execute("MATCH (node:Person) RETURN node");
 //		            System.out.println("======================");
-		            while(result.hasNext()){
-		            	Node node = (Node) result.next().get("node");
-		            	if(node.hasProperty("nodeRank")){
-		            		Integer rank = (Integer) node.getProperty("nodeRank");
+                    while (result.hasNext()) {
+                        Node node = (Node) result.next().get("node");
+                        if (node.hasProperty("nodeRank")) {
+                            Integer rank = (Integer) node.getProperty("nodeRank");
 //		            		System.out.println(node.getProperty("name")+": "+node.getProperty("nodeRank"));
-		            		if(rank > 2){
-		            			count++;			            			
-		            		}
-		            	}
-		            }
-		            tx.failure();
-		        }catch(Exception e){e.printStackTrace();}
-		        
-		        try {
-		        	TimeUnit.SECONDS.sleep(1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}while( count < 6 );
-			
-			initialized = true;
-		}
-	}
-	
+                            if (rank > 2) {
+                                count++;
+                            }
+                        }
+                    }
+                    tx.failure();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } while (count < 6);
+
+            initialized = true;
+        }
+    }
+
     @Test
     public void testProcedureCall_LEADER() throws InterruptedException, IOException {
         GraphDatabaseService database = getLeaderDatabase();
@@ -139,12 +137,12 @@ public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesin
                 Map<String, Object> record = result.next();
                 ranked.add((Node) record.get("node"));
             }
-            assertFalse("No ranked nodes found",ranked.isEmpty());
+            assertFalse("No ranked nodes found", ranked.isEmpty());
             assertEquals("Michal", ranked.get(0).getProperty("name"));
             tx.failure();
         }
     }
-	
+
     @Test
     public void testProcedureCall_FOLLOWER() throws InterruptedException, IOException {
         GraphDatabaseService database = getOneFollowerDatabase();
@@ -155,13 +153,13 @@ public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesin
                 Map<String, Object> record = result.next();
                 ranked.add((Node) record.get("node"));
             }
-            assertFalse("No ranked nodes found",ranked.isEmpty());
+            assertFalse("No ranked nodes found", ranked.isEmpty());
             assertEquals("Michal", ranked.get(0).getProperty("name"));
             tx.failure();
         }
     }
-    
-	
+
+
     @Test
     public void testProcedureCall_REPLICA() throws InterruptedException, IOException {
         GraphDatabaseService database = getOneReplicaDatabase();
@@ -172,7 +170,7 @@ public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesin
                 Map<String, Object> record = result.next();
                 ranked.add((Node) record.get("node"));
             }
-            assertFalse("No ranked nodes found",ranked.isEmpty());
+            assertFalse("No ranked nodes found", ranked.isEmpty());
             assertEquals("Michal", ranked.get(0).getProperty("name"));
             tx.failure();
         }
