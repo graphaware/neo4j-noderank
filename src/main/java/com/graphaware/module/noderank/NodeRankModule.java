@@ -18,6 +18,7 @@ package com.graphaware.module.noderank;
 
 import com.graphaware.common.log.LoggerFactory;
 import com.graphaware.runtime.config.TimerDrivenModuleConfiguration;
+import com.graphaware.runtime.config.util.InstanceRoleUtils;
 import com.graphaware.runtime.metadata.NodeBasedContext;
 import com.graphaware.runtime.module.BaseTimerDrivenModule;
 import com.graphaware.runtime.module.TimerDrivenModule;
@@ -102,23 +103,33 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
      * {@inheritDoc}
      */
     @Override
-    public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
-        topNodes.initializeIfNeeded(lastContext, database, config);
+	public NodeRankContext doSomeWork(NodeRankContext lastContext, GraphDatabaseService database) {
+		NodeRankContext result = lastContext;
 
-        Node lastNode = determineLastNode(lastContext, database);
-        Node nextNode = determineNextNode(lastNode, database);
+		if ( ! new InstanceRoleUtils(database).getInstaceRole().isReadOnly()) {
+			//when the instance can write, the topNodes are initialized by the context
+			//when the instance become master/leader (after election), starts from sharing data in the context
+			topNodes.initializeIfNeeded(lastContext, database, config);
 
-        if (nextNode == null) {
-            LOG.debug("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
-            return lastContext;
-        }
+			Node lastNode = determineLastNode(lastContext, database);
+			Node nextNode = determineNextNode(lastNode, database);
 
-        int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
-        nextNode.setProperty(config.getRankPropertyKey(), rankValue);
-        topNodes.addNode(nextNode, rankValue);
+			if (nextNode == null) {
+				LOG.debug("NodeRank did not find a node to continue with. There are no nodes matching the configuration.");
+				return lastContext;
+			}
 
-        return new NodeRankContext(nextNode, topNodes.getTopNodeIds());
-    }
+			int rankValue = (int) nextNode.getProperty(config.getRankPropertyKey(), 0) + 1;
+
+			nextNode.setProperty(config.getRankPropertyKey(), rankValue);
+
+			topNodes.addNode(nextNode, rankValue);
+
+			result = new NodeRankContext(nextNode, topNodes.getTopNodeIds());
+		}
+
+		return result;
+	}
 
     private Node determineLastNode(NodeBasedContext lastContext, GraphDatabaseService database) {
         if (lastContext == null) {

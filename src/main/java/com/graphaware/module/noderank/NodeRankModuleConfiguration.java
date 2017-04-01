@@ -16,8 +16,10 @@
 
 package com.graphaware.module.noderank;
 
-import com.graphaware.common.policy.NodeInclusionPolicy;
-import com.graphaware.common.policy.RelationshipInclusionPolicy;
+import com.graphaware.common.policy.inclusion.NodeInclusionPolicy;
+import com.graphaware.common.policy.inclusion.RelationshipInclusionPolicy;
+import com.graphaware.common.policy.role.AnyRole;
+import com.graphaware.common.policy.role.InstanceRolePolicy;
 import com.graphaware.runtime.config.BaseTimerDrivenModuleConfiguration;
 import com.graphaware.runtime.policy.all.IncludeAllBusinessNodes;
 import com.graphaware.runtime.policy.all.IncludeAllBusinessRelationships;
@@ -39,7 +41,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration(InstanceRolePolicy.MASTER_ONLY, "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
+        return new NodeRankModuleConfiguration(AnyRole.getInstance(), "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
     }
 
     /**

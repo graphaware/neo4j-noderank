@@ -16,18 +16,23 @@
 
 package com.graphaware.module.noderank;
 
-import com.graphaware.common.policy.BaseRelationshipInclusionPolicy;
-import com.graphaware.common.policy.fluent.IncludeNodes;
-import com.graphaware.runtime.metadata.NodeBasedContext;
-import com.graphaware.test.integration.DatabaseIntegrationTest;
-import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
-import org.junit.Test;
-import org.neo4j.graphdb.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+
+import com.graphaware.common.policy.inclusion.BaseRelationshipInclusionPolicy;
+import com.graphaware.common.policy.inclusion.fluent.IncludeNodes;
+import com.graphaware.runtime.metadata.NodeBasedContext;
+import com.graphaware.test.integration.EmbeddedDatabaseIntegrationTest;
 
 public class NodeRankModuleTest extends EmbeddedDatabaseIntegrationTest {
 
