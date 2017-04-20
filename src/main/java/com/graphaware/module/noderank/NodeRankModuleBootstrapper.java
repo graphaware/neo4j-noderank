@@ -19,6 +19,7 @@ package com.graphaware.module.noderank;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 import org.neo4j.logging.Log;
 
 import com.graphaware.common.log.LoggerFactory;
@@ -37,9 +38,11 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
 
     private static final String MAX_TOP_RANK_NODES = "maxTopRankNodes";
     private static final String DAMPING = "dampingFactor";
+    private static final String PROPERTY_KEY_COUNTER = "propertyCounterKey";
     private static final String PROPERTY_KEY = "propertyKey";
     private static final String NODE = "node";
     private static final String RELATIONSHIP = "relationship";
+    private static final String DIRECTION = "respectDirections";
 
     /**
      * {@inheritDoc}
@@ -50,6 +53,11 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
         LOG.debug("Configuration parameter map is: %s", config);
 
         NodeRankModuleConfiguration configuration = NodeRankModuleConfiguration.defaultConfiguration();
+
+        if (config.get(PROPERTY_KEY_COUNTER) != null) {
+            LOG.info("Property key counter set to %s", config.get(PROPERTY_KEY_COUNTER));
+            configuration = configuration.withRankPropertyCounterKey(config.get(PROPERTY_KEY_COUNTER));
+        }
 
         if (config.get(PROPERTY_KEY) != null) {
             LOG.info("Property key set to %s", config.get(PROPERTY_KEY));
@@ -76,6 +84,14 @@ public class NodeRankModuleBootstrapper implements RuntimeModuleBootstrapper {
             RelationshipInclusionPolicy policy = StringToRelationshipInclusionPolicy.getInstance().apply(config.get(RELATIONSHIP));
             LOG.info("Relationship Inclusion Policy set to %s", policy);
             configuration = configuration.with(policy);
+        }
+
+        if (config.get(DIRECTION) != null) {
+            if (Boolean.valueOf(config.get(DIRECTION)))
+              LOG.info("Direction of relationships will be respected");
+            else
+              LOG.info("Direction of relationships will not be respected");
+            configuration = configuration.withDirections(Boolean.valueOf(config.get(DIRECTION)));
         }
 
         return new NodeRankModule(moduleId, configuration);

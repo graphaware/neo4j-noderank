@@ -31,10 +31,12 @@ import com.graphaware.runtime.policy.all.IncludeAllBusinessRelationships;
 public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfiguration<NodeRankModuleConfiguration> {
 
     private final String rankPropertyKey;
+    private final String rankPropertyCounterKey;
     private final NodeInclusionPolicy nodeInclusionPolicy;
     private final RelationshipInclusionPolicy relationshipInclusionPolicy;
     private final int maxTopRankNodes;
     private final double dampingFactor;
+    private final boolean respectDirections;
 
     /**
      * Retrieves the default {@link NodeRankModuleConfiguration}, which includes all (non-internal) nodes and relationships.
@@ -42,7 +44,17 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return The default {@link NodeRankModuleConfiguration}
      */
     public static NodeRankModuleConfiguration defaultConfiguration() {
-        return new NodeRankModuleConfiguration(WritableRole.getInstance(), "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85);
+        return new NodeRankModuleConfiguration(WritableRole.getInstance(), "nodeRankCounter", "nodeRank", IncludeAllBusinessNodes.getInstance(), IncludeAllBusinessRelationships.getInstance(), 10, 0.85, false);
+    }
+
+    /**
+     * Construct a new configuration with the given rank property key counter.
+     *
+     * @param rankPropertyCounterKey key of the property counter written to the ranked nodes.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration withRankPropertyCounterKey(String rankPropertyCounterKey) {
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), rankPropertyCounterKey, getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor(), getDirections());
     }
 
     /**
@@ -52,7 +64,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return new config.
      */
     public NodeRankModuleConfiguration withRankPropertyKey(String rankPropertyKey) {
-        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), rankPropertyKey, getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor(), getDirections());
     }
 
     /**
@@ -62,7 +74,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return new config.
      */
     public NodeRankModuleConfiguration with(NodeInclusionPolicy nodeInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), getRankPropertyKey(), nodeInclusionPolicy, getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor(), getDirections());
     }
 
     /**
@@ -72,7 +84,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return new config.
      */
     public NodeRankModuleConfiguration with(RelationshipInclusionPolicy relationshipInclusionPolicy) {
-        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), getRankPropertyKey(), getNodeInclusionPolicy(), relationshipInclusionPolicy, getMaxTopRankNodes(), getDampingFactor(), getDirections());
     }
 
     /**
@@ -82,7 +94,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return new config.
      */
     public NodeRankModuleConfiguration withMaxTopRankNodes(int maxTopRankNodes) {
-        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes, getDampingFactor());
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), maxTopRankNodes, getDampingFactor(), getDirections());
     }
 
     /**
@@ -92,7 +104,17 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @return new config.
      */
     public NodeRankModuleConfiguration withDampingFactor(double dampingFactor) {
-        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), dampingFactor);
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), dampingFactor, getDirections());
+    }
+
+    /**
+     * Construct a new configuration with the given respect for relationships' directions..
+     *
+     * @param respectDirections new settings for respecting directions.
+     * @return new config.
+     */
+    public NodeRankModuleConfiguration withDirections(boolean respectDirections) {
+        return new NodeRankModuleConfiguration(getInstanceRolePolicy(), getRankPropertyCounterKey(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor(), respectDirections);
     }
 
     /**
@@ -104,7 +126,7 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      * @param relationshipInclusionPolicy The {@link RelationshipInclusionPolicy} for selecting which relationships to follow when crawling the graph.
      * @param maxTopRankNodes             maximum number of top ranked nodes to remember.
      */
-    private NodeRankModuleConfiguration(InstanceRolePolicy instanceRolePolicy, String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor) {
+    private NodeRankModuleConfiguration(InstanceRolePolicy instanceRolePolicy, String rankPropertyCounterKey, String rankPropertyKey, NodeInclusionPolicy nodeInclusionPolicy, RelationshipInclusionPolicy relationshipInclusionPolicy, int maxTopRankNodes, double dampingFactor, boolean respectDirections) {
         super(instanceRolePolicy);
 
         if (maxTopRankNodes < 0) {
@@ -116,10 +138,12 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
         }
 
         this.rankPropertyKey = rankPropertyKey;
+        this.rankPropertyCounterKey = rankPropertyCounterKey;
         this.nodeInclusionPolicy = nodeInclusionPolicy;
         this.relationshipInclusionPolicy = relationshipInclusionPolicy;
         this.maxTopRankNodes = maxTopRankNodes;
         this.dampingFactor = dampingFactor;
+        this.respectDirections = respectDirections;
     }
 
     /**
@@ -127,7 +151,11 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
      */
     @Override
     protected NodeRankModuleConfiguration newInstance(InstanceRolePolicy instanceRolePolicy) {
-        return new NodeRankModuleConfiguration(instanceRolePolicy, getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor());
+        return new NodeRankModuleConfiguration(instanceRolePolicy, getRankPropertyCounterKey(), getRankPropertyKey(), getNodeInclusionPolicy(), getRelationshipInclusionPolicy(), getMaxTopRankNodes(), getDampingFactor(), getDirections());
+    }
+
+    public String getRankPropertyCounterKey() {
+        return rankPropertyCounterKey;
     }
 
     public String getRankPropertyKey() {
@@ -148,5 +176,9 @@ public class NodeRankModuleConfiguration extends BaseTimerDrivenModuleConfigurat
 
     public double getDampingFactor() {
         return dampingFactor;
+    }
+
+    public boolean getDirections() {
+      return respectDirections;
     }
 }
