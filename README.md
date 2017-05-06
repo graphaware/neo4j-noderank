@@ -2,7 +2,7 @@
 GraphAware Neo4j NodeRank
 ==========================
 
-[![Build Status](https://travis-ci.org/graphaware/neo4j-noderank.png)](https://travis-ci.org/graphaware/neo4j-noderank) | <a href="http://graphaware.com/downloads/" target="_blank">Downloads</a> | <a href="http://graphaware.com/site/noderank/latest/apidocs/" target="_blank">Javadoc</a> | Latest Release: 3.1.0.44.4
+[![Build Status](https://travis-ci.org/graphaware/neo4j-noderank.png)](https://travis-ci.org/graphaware/neo4j-noderank) | <a href="http://graphaware.com/downloads/" target="_blank">Downloads</a> | <a href="http://graphaware.com/site/noderank/latest/apidocs/" target="_blank">Javadoc</a> | Latest Release: 3.1.4.49.5
 
 GraphAware NodeRank is a [GraphAware](https://github.com/graphaware/neo4j-framework) Runtime Module that executes a configurable
 Page Rank-like algorithm on the Neo4j graph. It is a reference implementation of a [Timer-Driven GraphAware Runtime Module](https://github.com/graphaware/neo4j-framework/tree/master/runtime#building-a-timer-driven-graphaware-runtime-module).
@@ -46,7 +46,7 @@ Releases are synced to <a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%
         <dependency>
             <groupId>com.graphaware.neo4j</groupId>
             <artifactId>noderank</artifactId>
-            <version>3.1.0.44.4</version>
+            <version>3.1.4.49.5</version>
         </dependency>
         ...
     </dependencies>
@@ -54,7 +54,7 @@ Releases are synced to <a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%
 #### Snapshots
 
 To use the latest development version, just clone this repository, run `mvn clean install` and change the version in the
-dependency above to 3.1.0.44.5-SNAPSHOT.
+dependency above to 3.1.4.49.6-SNAPSHOT.
 
 #### Note on Versioning Scheme
 
@@ -190,7 +190,7 @@ Please refer to Javadoc for more detail.
 License
 -------
 
-Copyright (c) 2014-2016 GraphAware
+Copyright (c) 2014-2017 GraphAware
 
 GraphAware is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
