@@ -50,23 +50,18 @@ public class NodeRankProcedureTestCausalCluster extends CausalClusterDatabasesin
     }
 
     @Override
-    protected boolean shouldRegisterProcedures() {
+    protected boolean shouldRegisterProceduresAndFunctions() {
         return true;
     }
 
     @Override
-    protected void registerModule(GraphDatabaseService db) throws Exception {
+    protected void registerModules(GraphDatabaseService db) throws Exception {
         GraphAwareRuntime runtime = GraphAwareRuntimeFactory.createRuntime(db);
         NodeRankModuleConfiguration config = NodeRankModuleConfiguration.defaultConfiguration()
                 .with(WritableRole.getInstance())
                 .withMaxTopRankNodes(3);
         runtime.registerModule(new NodeRankModule("noderank", config));
         runtime.start();
-    }
-
-    @Override
-    protected void registerProcedures(Procedures procedures) throws Exception {
-        procedures.registerProcedure(NodeRankProcedure.class);
     }
 
     @Override
