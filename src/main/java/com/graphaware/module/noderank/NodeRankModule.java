@@ -94,8 +94,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
           if (resSum.hasNext())
             this.counter = (Long)(resSum.next().get("sum"));
         } catch (Exception e) {
-          LOG.error("Exception thrown: " + e);
-          e.printStackTrace();
+          LOG.error("Exception thrown while getting sum of nodeRank counters:", e);
           this.counter = 0L;
         }
 
@@ -146,15 +145,17 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         nextNode.setProperty(config.getRankPropertyKey(), rankValue);
         topNodes.addNode(nextNode, rankValue);*/
         int rankCounterValue = (int) nextNode.getProperty(config.getRankPropertyCounterKey(), 0);
-        if (rankCounterValue==0)
+        if (rankCounterValue==0) {
           rankCounterValue = setToOneOrEstimate(nextNode, database);
-        else
+          this.counter += rankCounterValue; // since we added (estimated) number of hops to a new node, we also need to update overall counter
+        } else {
           rankCounterValue += 1;
-        this.counter += 1L;
+          this.counter += 1L;
+        }
         double rankValue = 100.*rankCounterValue/counter;
         nextNode.setProperty(config.getRankPropertyCounterKey(), rankCounterValue);
         nextNode.setProperty(config.getRankPropertyKey(), rankValue);
-        topNodes.addNode(nextNode, rankCounterValue);
+        topNodes.addNode(nextNode, rankValue);
 
         if (counter%100000==0)
           LOG.debug("NodeRank counter = %d", counter);
@@ -197,7 +198,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         } else { // directions do matter (would be better to change RandomRelationshipSelector in the Framework)
           ReservoirSampler<Relationship> randomSampler = new ReservoirSampler<>(1);
           for (Relationship r : currentNode.getRelationships(Direction.OUTGOING)) {
-            if (!config.getRelationshipInclusionPolicy().include(r, currentNode))
+            if (config.getRelationshipInclusionPolicy().include(r, currentNode))
               randomSampler.sample(r);
           }
           if (randomSampler.isEmpty()) {
@@ -210,7 +211,7 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
         Node result = randomRelationship.getOtherNode(currentNode);
 
         if (!config.getNodeInclusionPolicy().include(result)) {
-            LOG.debug("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
+            LOG.info("Relationship Inclusion Policy allows for a relationship, which leads to a node that " +
                     "is not included by the Node Inclusion Policy. This is likely a mis-configuration");
         }
 
@@ -233,7 +234,8 @@ public class NodeRankModule extends BaseTimerDrivenModule<NodeRankContext> imple
           nNodes += 1;
       }
 
-      // If the counter is in advanced stage (meaning this node should have been already visited), estimate it's NodeRank based on standard PageRank equation
+      // If the counter is in advanced stage (meaning this node should have been already visited many times),
+      //   estimate it's NodeRank based on standard PageRank equation to converge to the right value as quickly as possible
       double d = config.getDampingFactor();
       if (d>0.95) d = 0.95;
       if (this.counter > 3*nNodes/(1-d)) { // i.e. high probability that the current node was added later (purely based on (1-d), i.e. ignoring relationships)

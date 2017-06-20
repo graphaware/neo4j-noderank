@@ -82,8 +82,14 @@ com.graphaware.module.NR.maxTopRankNodes=10
 #with the probability 1-p (as opposed to following a random relationship). The default is 0.85
 com.graphaware.module.NR.dampingFactor=0.85
 
-#optional key of the property that gets written to the ranked nodes, default is "nodeRank"
+#optional key of the property (ever-increasing counter) that gets written to the ranked nodes, default is "nodeRankCounter"
+com.graphaware.module.NR.propertyCounterKey=nodeRankCounter
+
+#optional key of the property (represented as percentage) that gets written to the ranked nodes, default is "nodeRank"
 com.graphaware.module.NR.propertyKey=nodeRank
+
+#optional: respect directions of relationships or not? Default is 'false'.
+com.graphaware.module.NR.respectDirections=true
 
 #optionally specify nodes to rank using an expression-based node inclusion policy, default is all business (i.e. non-framework-internal) nodes
 com.graphaware.module.NR.node=hasLabel('Person')

@@ -33,7 +33,7 @@ public class TopRankedNodes {
 
     private static final Log LOG = LoggerFactory.getLogger(TopRankedNodes.class);
 
-    private BoundedSortedList<Node, Integer> topNodes;
+    private BoundedSortedList<Node, Double> topNodes;
 
     public List<Node> getTopNodes() {
         if (topNodes == null) {
@@ -43,7 +43,7 @@ public class TopRankedNodes {
         return topNodes.getItems();
     }
 
-    public void addNode(Node node, int rank) {
+    public void addNode(Node node, double rank) {
         if (topNodes == null) {
             throw new IllegalStateException("Please initialize top ranked nodes first");
         }
@@ -56,7 +56,7 @@ public class TopRankedNodes {
             return;
         }
 
-        topNodes = new BoundedSortedList<>(config.getMaxTopRankNodes(), Collections.<Integer>reverseOrder());
+        topNodes = new BoundedSortedList<>(config.getMaxTopRankNodes(), Collections.<Double>reverseOrder());
 
         if (context == null) {
             return;
@@ -64,7 +64,7 @@ public class TopRankedNodes {
 
         for (long nodeId : context.getTopNodes()) {
             try {
-                topNodes.add(database.getNodeById(nodeId), (int) database.getNodeById(nodeId).getProperty(config.getRankPropertyKey(), 0));
+                topNodes.add(database.getNodeById(nodeId), (double) database.getNodeById(nodeId).getProperty(config.getRankPropertyKey(), 0));
             } catch (Exception e) {
                 LOG.warn("Exception while adding ranked node " + nodeId + " to the collection of top ranked nodes. Will ignore...", e);
             }
