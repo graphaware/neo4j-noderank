@@ -28,7 +28,7 @@ algorithm, it follows a random relationship (obeying configured relationship inc
 factor, it selects another random node rather than following a relationship. Also, if there are no suitable relationships
 to follow from a node, a jump to another suitable random node is performed.
 
-Over time, the node ranks written to the nodes in the graph converge to the results of Page Rank, has it been computed
+Over time, the node ranks written to the nodes in the graph converge to the results of Page Rank, had it been computed
 analytically. The amount of time it takes to converge greatly depends on the size of the graph, the load on the database,
 and the [Timer-Driven Module Scheduling Configuration](https://github.com/graphaware/neo4j-framework/tree/master/runtime#building-a-timer-driven-graphaware-runtime-module).
 With default settings and 100 nodes in the database, the top 10 nodes are identical for NodeRank and Page Rank within a
