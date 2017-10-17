@@ -1,7 +1,20 @@
 <a name="top"/>
 
-GraphAware Neo4j NodeRank
-==========================
+GraphAware Neo4j NodeRank - RETIRED
+=====================================
+
+NodeRank Has Been Retired
+---------------------------
+
+As of October 17th 2017, this module is retiring. This means it will no longer be maintained and released together with
+new versions of the GraphAware Framework and Neo4j. The last compatible Neo4j version is 3.2.5.
+
+NodeRank is superseded by a much more active <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms">Neo4j Graph Algorithms</a> project.
+
+This repository will remain public. Please <a href="http://graphaware.com/contact/">get in touch</a> if you've been using NodeRank and would like to migrate to
+Neo4j Graph Algorithms.
+
+=====================================
 
 [![Build Status](https://travis-ci.org/graphaware/neo4j-noderank.png)](https://travis-ci.org/graphaware/neo4j-noderank) | <a href="http://graphaware.com/downloads/" target="_blank">Downloads</a> | <a href="http://graphaware.com/site/noderank/latest/apidocs/" target="_blank">Javadoc</a> | Latest Release: 3.2.5.51.5
 
